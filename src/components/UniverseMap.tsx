@@ -1,28 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
+import { GraphNode, GraphEdge } from '../types';
 
 export default function UniverseMap() {
-  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const {
-    filteredNodes: nodes,
-    filteredEdges: edges,
-    selectedNodeId,
-    setSelectedNodeId,
-    hoveredNodeId,
-    setHoveredNodeId,
-    pathStartNodeId,
-    pathEndNodeId,
-    pathResult,
-  } = useAppStore();
+  const { filteredNodes: nodes, filteredEdges: edges, selectedNodeId, setSelectedNodeId, hoveredNodeId, setHoveredNodeId } = useAppStore();
 
   const gRef = useRef<any>(null); // Keep reference to main group
   const simulationRef = useRef<any>(null);
   const zoomRef = useRef<any>(null);
-  const didDragRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current || !svgRef.current) return;
@@ -166,13 +154,8 @@ export default function UniverseMap() {
         .on('drag', dragged)
         .on('end', dragended))
       .on('click', (event, d) => {
-        event.stopPropagation();
-        if (didDragRef.current) {
-          didDragRef.current = false;
-          return;
-        }
         setSelectedNodeId(d.id);
-        navigate(`/node/${d.id}`);
+        event.stopPropagation();
       })
       .on('contextmenu', (event, d) => {
         event.preventDefault(); // allow right click to toggle isolated branch mode
@@ -303,14 +286,12 @@ export default function UniverseMap() {
     svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8).translate(-width/2, -height/2));
 
     function dragstarted(event: any) {
-      didDragRef.current = false;
       if (!event.active) simulation.alphaTarget(0.3).restart();
       event.subject.fx = event.subject.x;
       event.subject.fy = event.subject.y;
     }
 
     function dragged(event: any) {
-      didDragRef.current = true;
       event.subject.fx = event.x;
       event.subject.fy = event.y;
     }
@@ -356,59 +337,51 @@ export default function UniverseMap() {
     // Path Finding Logic
     const pathNodes = new Set<string>();
     const pathEdges = new Set<string>();
-    const { exploreMode } = useAppStore.getState();
+    const { pathStartNodeId, pathEndNodeId, exploreMode } = useAppStore.getState();
 
     if (pathStartNodeId && pathEndNodeId) {
-      if (pathResult?.found) {
-        pathResult.nodeIds.forEach(id => pathNodes.add(id));
-        pathResult.edges.forEach(edge => {
-          pathEdges.add(`${edge.sourceId}-${edge.targetId}`);
-          pathEdges.add(`${edge.targetId}-${edge.sourceId}`);
-        });
-      } else {
-        // Fallback when the API is unavailable: local BFS over the currently rendered graph.
-        const graph = new Map<string, string[]>();
-        edges.forEach(e => {
-          const u = e.sourceId || (typeof e.source === 'object' ? e.source.id : e.source);
-          const v = e.targetId || (typeof e.target === 'object' ? e.target.id : e.target);
-          if(!graph.has(u)) graph.set(u, []);
-          if(!graph.has(v)) graph.set(v, []);
-          graph.get(u)!.push(v);
-          graph.get(v)!.push(u);
-        });
+      // Basic BFS to find shortest path
+      const graph = new Map<string, string[]>();
+      edges.forEach(e => {
+        const u = e.sourceId || (typeof e.source === 'object' ? e.source.id : e.source);
+        const v = e.targetId || (typeof e.target === 'object' ? e.target.id : e.target);
+        if(!graph.has(u)) graph.set(u, []);
+        if(!graph.has(v)) graph.set(v, []);
+        graph.get(u)!.push(v);
+        graph.get(v)!.push(u); // assuming undirected for exploration
+      });
 
-        const queue = [pathStartNodeId];
-        const visited = new Set<string>([pathStartNodeId]);
-        const parent = new Map<string, string>();
+      const queue = [pathStartNodeId];
+      const visited = new Set<string>([pathStartNodeId]);
+      const parent = new Map<string, string>();
 
-        let found = false;
-        while(queue.length > 0) {
-          const curr = queue.shift()!;
-          if (curr === pathEndNodeId) {
-            found = true;
-            break;
-          }
-          const neighbors = graph.get(curr) || [];
-          for (const n of neighbors) {
-            if (!visited.has(n)) {
-              visited.add(n);
-              parent.set(n, curr);
-              queue.push(n);
-            }
+      let found = false;
+      while(queue.length > 0) {
+        const curr = queue.shift()!;
+        if (curr === pathEndNodeId) {
+          found = true;
+          break;
+        }
+        const neighbors = graph.get(curr) || [];
+        for (const n of neighbors) {
+          if (!visited.has(n)) {
+            visited.add(n);
+            parent.set(n, curr);
+            queue.push(n);
           }
         }
+      }
 
-        if (found) {
-          let curr = pathEndNodeId;
-          while(curr !== pathStartNodeId) {
-            pathNodes.add(curr);
-            const p = parent.get(curr)!;
-            pathEdges.add(`${p}-${curr}`);
-            pathEdges.add(`${curr}-${p}`);
-            curr = p;
-          }
-          pathNodes.add(pathStartNodeId);
+      if (found) {
+        let curr = pathEndNodeId;
+        while(curr !== pathStartNodeId) {
+          pathNodes.add(curr);
+          const p = parent.get(curr)!;
+          pathEdges.add(`${p}-${curr}`);
+          pathEdges.add(`${curr}-${p}`);
+          curr = p;
         }
+        pathNodes.add(pathStartNodeId);
       }
     }
     
@@ -526,7 +499,7 @@ export default function UniverseMap() {
       }
     }
 
-  }, [selectedNodeId, hoveredNodeId, edges, pathStartNodeId, pathEndNodeId, pathResult]);
+  }, [selectedNodeId, hoveredNodeId, edges]);
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-transparent">

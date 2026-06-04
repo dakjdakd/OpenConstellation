@@ -1,322 +1,194 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { ProjectSkillProfile, SkillEntry, ProjectSkillState, GlobalSettings, SkillConflictRule } from './types';
+import { GraphNode, GraphEdge } from './types';
+import { mockData } from './data';
 
-export const knownSkills: SkillEntry[] = [
-  {
-    id: "design-taste-frontend",
-    name: "design-taste-frontend",
-    platform: "generic",
-    category: "frontend_design",
-    risk: "medium",
-    defaultActivation: "auto_candidate",
-    description: "用于前端页面、落地页、品牌页、视觉方向和设计质量控制。",
-    sourcePath: "~/.agents/skills/design-taste-frontend"
-  },
-  {
-    id: "baseline-ui",
-    name: "baseline-ui",
-    platform: "generic",
-    category: "frontend_quality",
-    risk: "low",
-    defaultActivation: "auto_candidate",
-    description: "用于组件质量、可访问性、响应式布局和 Tailwind UI 稳定性检查。",
-    sourcePath: "~/.agents/skills/baseline-ui"
-  },
-  {
-    id: "browser:control-in-app-browser",
-    name: "browser:control-in-app-browser",
-    platform: "generic",
-    category: "browser_testing",
-    risk: "low",
-    defaultActivation: "auto_candidate",
-    description: "用于打开本地页面、检查布局、截图和验证交互。",
-    sourcePath: "~/.codex/skills/browser"
-  },
-  {
-    id: "playwright-interactive",
-    name: "playwright-interactive",
-    platform: "generic",
-    category: "browser_testing",
-    risk: "medium",
-    defaultActivation: "manual_candidate",
-    description: "Playwright UI 交互测试。"
-  },
-  {
-    id: "imagegen",
-    name: "imagegen",
-    platform: "generic",
-    category: "image_generation",
-    risk: "medium",
-    defaultActivation: "manual_candidate",
-    description: "用于生成位图图片、商品图、banner、插图和视觉素材。",
-    sourcePath: "~/.agents/skills/imagegen"
-  },
-  {
-    id: "netlify-deploy",
-    name: "netlify-deploy",
-    platform: "generic",
-    category: "deployment",
-    risk: "high",
-    defaultActivation: "manual_candidate",
-    description: "只在用户明确要求部署或发布网站时使用。"
-  },
-  {
-    id: "openai-docs",
-    name: "openai-docs",
-    platform: "generic",
-    category: "openai_docs",
-    risk: "low",
-    defaultActivation: "disabled_candidate",
-    description: "OpenAI API 读取与参考。"
-  },
-  {
-    id: "documents:documents",
-    name: "documents:documents",
-    platform: "generic",
-    category: "document_editing",
-    risk: "medium",
-    defaultActivation: "disabled_candidate",
-    description: "用于创建或编辑 Word / Docx 文档。"
-  },
-  {
-    id: "spreadsheets:Spreadsheets",
-    name: "spreadsheets:Spreadsheets",
-    platform: "generic",
-    category: "spreadsheet_analysis",
-    risk: "medium",
-    defaultActivation: "disabled_candidate",
-    description: "创建或编辑 Excel / CSV 表格。"
-  },
-  {
-    id: "presentations:Presentations",
-    name: "presentations:Presentations",
-    platform: "generic",
-    category: "presentation_building",
-    risk: "medium",
-    defaultActivation: "disabled_candidate",
-    description: "创建 PPT / 幻灯片。"
-  },
-  {
-    id: "storage-analyzer",
-    name: "storage-analyzer",
-    platform: "generic",
-    category: "storage_analysis",
-    risk: "high",
-    defaultActivation: "disabled_candidate",
-    description: "分析本地可用存储空间和文件结构。"
-  },
-  {
-    id: "karpathy-guidelines",
-    name: "karpathy-guidelines",
-    platform: "generic",
-    category: "generic_coding",
-    risk: "low",
-    defaultActivation: "auto_candidate",
-    description: "代码极简主义指导原则。"
-  }
-];
+interface AppState {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  selectedNodeId: string | null;
+  setSelectedNodeId: (id: string | null) => void;
+  hoveredNodeId: string | null;
+  setHoveredNodeId: (id: string | null) => void;
+  showFilters: boolean;
+  setShowFilters: (show: boolean) => void;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  filteredNodes: GraphNode[];
+  filteredEdges: GraphEdge[];
+  activeFilterType: string | null;
+  setActiveFilterType: (type: string | null) => void;
+  activeRelationFilter: string | null;
+  setActiveRelationFilter: (rel: string | null) => void;
+  activePopularityFilter: string | null;
+  setActivePopularityFilter: (pop: string | null) => void;
+  activeCategoryFilter: string | null;
+  setActiveCategoryFilter: (cat: string | null) => void;
+  activeTimeRange: [number, number] | null;
+  setActiveTimeRange: (range: [number, number] | null) => void;
+  resetAllFilters: () => void;
+  isolatedNodeId: string | null;
+  setIsolatedNodeId: (id: string | null) => void;
+  appState: 'landing' | 'generating' | 'exploring';
+  setAppState: (state: 'landing' | 'generating' | 'exploring') => void;
+  searchHistory: string[];
+  addSearchHistory: (query: string) => void;
+  clearSearchHistory: () => void;
+  applyFilters: () => void;
+  zoomTransform: { k: number; x: number; y: number };
+  setZoomTransform: (transform: { k: number; x: number; y: number }) => void;
+  pathStartNodeId: string | null;
+  setPathStartNodeId: (id: string | null) => void;
+  pathEndNodeId: string | null;
+  setPathEndNodeId: (id: string | null) => void;
+  exploreMode: boolean;
+  setExploreMode: (explore: boolean) => void;
 
-const LOCAL_STORAGE_KEY = 'skillgate-v1-storage';
-
-interface SkillGateState {
-  profile: ProjectSkillProfile | null;
-  recentProfiles: ProjectSkillProfile[];
-  settings: GlobalSettings;
-  lastScanTime: string | null;
-  setProfile: (profile: ProjectSkillProfile) => void;
-  deleteProfile: (id: string) => void;
-  loadProfile: (id: string) => void;
-  updateSkillState: (skillId: string, updates: Partial<ProjectSkillState>) => void;
-  analyzeRequirement: (requirement: string) => void;
-  updateSettings: (settings: Partial<GlobalSettings>) => void;
-  resetAll: () => void;
-  setLastScanTime: (time: string) => void;
+  favorites: string[];
+  collections: { id: string; name: string; nodes: string[]; color?: string }[];
+  recentViews: string[];
+  addFavorite: (id: string) => void;
+  removeFavorite: (id: string) => void;
+  createCollection: (name: string, color?: string) => void;
+  addNodeToCollection: (collectionId: string, nodeId: string) => void;
+  addRecentView: (id: string) => void;
 }
 
-const defaultSettings: GlobalSettings = {
-  skillSources: '~/.codex/skills\n~/.agents/skills\n~/.claude/skills\nproject/.codex/skills\nproject/.agents/skills',
-  defaultTargets: ['codex', 'claude-code'],
-  outputPrefs: ['agents', 'claude', 'profile', 'policy', 'prompt'],
-  isCRT: false,
-  hasBooted: false
-};
+export const useAppStore = create<AppState>((set, get) => ({
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  selectedNodeId: null,
+  setSelectedNodeId: (id) => {
+    set({ selectedNodeId: id });
+    if (id) get().addRecentView(id);
+  },
+  hoveredNodeId: null,
+  setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
+  showFilters: false,
+  setShowFilters: (show) => set({ showFilters: show }),
+  nodes: mockData.nodes,
+  edges: mockData.edges,
+  filteredNodes: mockData.nodes,
+  filteredEdges: mockData.edges,
+  activeFilterType: null,
+  activeRelationFilter: null,
+  activePopularityFilter: null,
+  activeCategoryFilter: null,
+  activeTimeRange: null,
+  isolatedNodeId: null,
+  appState: 'landing',
+  setAppState: (state) => set({ appState: state }),
+  zoomTransform: { k: 1, x: 0, y: 0 },
+  setZoomTransform: (transform) => set({ zoomTransform: transform }),
+  pathStartNodeId: null,
+  setPathStartNodeId: (id) => set({ pathStartNodeId: id }),
+  pathEndNodeId: null,
+  setPathEndNodeId: (id) => set({ pathEndNodeId: id }),
+  exploreMode: false,
+  setExploreMode: (explore) => set({ exploreMode: explore }),
+  favorites: [],
+  collections: [{id: '1', name: 'Agents', nodes: []}, {id: '2', name: 'Foundational Models', nodes: []}],
+  recentViews: [],
+  addFavorite: (id) => set(s => ({ favorites: [...s.favorites.filter(x => x !== id), id] })),
+  removeFavorite: (id) => set(s => ({ favorites: s.favorites.filter(x => x !== id) })),
+  createCollection: (name, color) => set(s => ({ collections: [...s.collections, { id: Math.random().toString(), name, nodes: [], color }] })),
+  addNodeToCollection: (collectionId, nodeId) => set(s => ({
+    collections: s.collections.map(c => c.id === collectionId ? { ...c, nodes: [...new Set([...c.nodes, nodeId])] } : c)
+  })),
+  addRecentView: (id) => set(s => ({ recentViews: [id, ...s.recentViews.filter(x => x !== id)].slice(0, 15) })),
 
-function generateDynamicConflicts(skills: ProjectSkillState[]): SkillConflictRule[] {
-  const conflicts: SkillConflictRule[] = [];
-  
-  const isEnabled = (id: string) => skills.find(s => s.skillId === id)?.activation === 'enabled';
-
-  // Rule 1: frontend design vs baseline ui
-  if (isEnabled('design-taste-frontend') && isEnabled('baseline-ui')) {
-    conflicts.push({
-      id: "design-taste-frontend-vs-baseline-ui",
-      skills: ["design-taste-frontend", "baseline-ui"],
-      resolution: "split_responsibility",
-      responsibilities: {
-        "design-taste-frontend": "负责视觉方向、核心UI架构、创新性布局和高级感体验。",
-        "baseline-ui": "负责具体组件的严谨实现、Tailwind 类的正确性、可访问性、以及响应式稳定性。"
-      },
-      reason: "两者都涉及前端干预，避免在具体细节与宏观方向上发生操作冲突。"
+  setIsolatedNodeId: (id) => {
+    set({ isolatedNodeId: id });
+    get().applyFilters();
+  },
+  setActiveFilterType: (type) => {
+    set({ activeFilterType: type });
+    get().applyFilters();
+  },
+  setActiveRelationFilter: (rel) => {
+    set({ activeRelationFilter: rel });
+    get().applyFilters();
+  },
+  setActivePopularityFilter: (pop) => {
+    set({ activePopularityFilter: pop });
+    get().applyFilters();
+  },
+  setActiveCategoryFilter: (cat) => {
+    set({ activeCategoryFilter: cat });
+    get().applyFilters();
+  },
+  setActiveTimeRange: (range) => {
+    set({ activeTimeRange: range });
+    get().applyFilters();
+  },
+  resetAllFilters: () => {
+    set({
+      activeFilterType: null,
+      activeRelationFilter: null,
+      activePopularityFilter: null,
+      activeCategoryFilter: null,
+      activeTimeRange: null,
+      isolatedNodeId: null
     });
-  }
+    get().applyFilters();
+  },
+  searchHistory: [],
+  addSearchHistory: (query) => set((state) => {
+    const nh = [query, ...state.searchHistory.filter(q => q !== query)].slice(0, 10);
+    return { searchHistory: nh };
+  }),
+  clearSearchHistory: () => set({ searchHistory: [] }),
+  applyFilters: () => {
+    const { nodes, edges, activeFilterType, activeRelationFilter, activePopularityFilter, activeCategoryFilter, activeTimeRange, isolatedNodeId } = get();
+    let fn = nodes;
+    let fe = edges;
 
-  // Add more dynamic rules as needed
-  
-  return conflicts;
-}
-
-export const useStore = create<SkillGateState>()(
-  persist(
-    (set, get) => ({
-      profile: null,
-      recentProfiles: [],
-      settings: defaultSettings,
-      lastScanTime: null,
-      
-      setProfile: (profile) => set((state) => {
-        const existingIdx = state.recentProfiles.findIndex(p => p.id === profile.id);
-        let newRecents = [...state.recentProfiles];
-        if (existingIdx >= 0) {
-          newRecents[existingIdx] = profile;
-        } else {
-          newRecents = [profile, ...newRecents].slice(0, 50);
-        }
-        return { profile, recentProfiles: newRecents };
-      }),
-
-      deleteProfile: (id) => set((state) => ({
-        recentProfiles: state.recentProfiles.filter(p => p.id !== id),
-        profile: state.profile?.id === id ? null : state.profile
-      })),
-
-      loadProfile: (id) => set((state) => ({
-        profile: state.recentProfiles.find(p => p.id === id) || null
-      })),
-      
-      updateSkillState: (skillId, updates) => set((state) => {
-        if (!state.profile) return state;
-        
-        const newSkills = state.profile.skills.map(skill => 
-          skill.skillId === skillId ? { ...skill, ...updates } : skill
-        );
-        
-        const newConflicts = generateDynamicConflicts(newSkills);
-
-        const updatedProfile = {
-          ...state.profile,
-          skills: newSkills,
-          conflicts: newConflicts,
-          updatedAt: new Date().toISOString()
-        };
-
-        const existingIdx = state.recentProfiles.findIndex(p => p.id === state.profile!.id);
-        const newRecents = [...state.recentProfiles];
-        if (existingIdx >= 0) {
-          newRecents[existingIdx] = updatedProfile;
-        }
-
-        return {
-          profile: updatedProfile,
-          recentProfiles: newRecents
-        };
-      }),
-      
-      analyzeRequirement: (requirement: string) => set((state) => {
-        if (!state.profile) return state;
-
-        let detectedType = "frontend";
-        
-        if (requirement.includes("淘宝") || requirement.includes("电商") || requirement.includes("购物车") || requirement.includes("结算")) {
-          detectedType = "frontend_ecommerce_app";
-        } else if (requirement.includes("落地页") || requirement.includes("设计") || requirement.includes("官网")) {
-          detectedType = "design_landing_page";
-        } else if (requirement.includes("部署") || requirement.includes("上线")) {
-          detectedType = "deployment_task";
-        } else if (requirement.includes("文档") || requirement.includes("报告")) {
-          detectedType = "documentation_task";
-        }
-
-        const newSkills = knownSkills.map(skill => {
-          let activation = "disabled" as "enabled" | "manual_only" | "disabled";
-          let reason = "系统默认规则";
-
-          // Baseline defaults for all scenarios
-          if (["netlify-deploy", "imagegen", "storage-analyzer"].includes(skill.id)) {
-            activation = "manual_only";
-            reason = `The risk level of ${skill.id} is high/medium. Should not auto-activate.`;
-          }
-
-          if (detectedType === "frontend_ecommerce_app" || detectedType === "design_landing_page") {
-            if (["design-taste-frontend", "baseline-ui", "browser:control-in-app-browser", "karpathy-guidelines"].includes(skill.id)) {
-              activation = "enabled";
-              reason = "当前项目属于前端/设计范畴，需要相关的审美调整、组件稳定与浏览器验证。";
-            }
-          }
-
-          if (detectedType === "deployment_task") {
-            if (skill.id === "netlify-deploy") {
-              activation = "enabled"; // explicit enable for deploy tasks
-              reason = "部署任务明确触发";
-            }
-          }
-
-          if (detectedType === "documentation_task") {
-            if (skill.id === "documents:documents") {
-              activation = "enabled";
-              reason = "文档生成任务需要调用 Office 处理能力。";
-            }
-            if (["design-taste-frontend", "baseline-ui", "browser:control-in-app-browser"].includes(skill.id)) {
-              activation = "disabled";
-              reason = "文档任务不适用前端验证。";
-            }
-          }
-
-          return {
-            skillId: skill.id,
-            activation,
-            reason
-          };
-        });
-
-        const newConflicts = generateDynamicConflicts(newSkills);
-        
-        const updatedProfile = {
-          ...state.profile,
-          requirement,
-          detectedProjectType: detectedType,
-          skills: newSkills,
-          conflicts: newConflicts,
-          updatedAt: new Date().toISOString()
-        };
-
-        const existingIdx = state.recentProfiles.findIndex(p => p.id === state.profile!.id);
-        const newRecents = [...state.recentProfiles];
-        if (existingIdx >= 0) {
-          newRecents[existingIdx] = updatedProfile;
-        }
-
-        return {
-          profile: updatedProfile,
-          recentProfiles: newRecents
-        };
-      }),
-
-      updateSettings: (updates) => set((state) => ({
-        settings: { ...state.settings, ...updates }
-      })),
-
-      resetAll: () => set({
-        profile: null,
-        recentProfiles: [],
-        settings: defaultSettings,
-        lastScanTime: null
-      }),
-
-      setLastScanTime: (time) => set({ lastScanTime: time })
-    }),
-    {
-      name: LOCAL_STORAGE_KEY,
+    if (isolatedNodeId) {
+      const connected = new Set<string>([isolatedNodeId]);
+      edges.forEach(e => {
+        if (e.sourceId === isolatedNodeId) connected.add(e.targetId);
+        if (e.targetId === isolatedNodeId) connected.add(e.sourceId);
+      });
+      fn = fn.filter(n => connected.has(n.id));
+      fe = fe.filter(e => connected.has(e.sourceId) && connected.has(e.targetId));
     }
-  )
-);
+
+    if (activeFilterType) {
+      fn = fn.filter(n => n.type === activeFilterType);
+    }
+    
+    // We assume data has these fields, or we use defaults if missing
+    if (activePopularityFilter) {
+      // Hot, Rising, Classic. Since our MockData doesn't fully support this, let's fake it based on some logic or ignore if missing.
+      // Usually, n.popularity is a number or string. Let's assume popularity > 80 is Hot etc for now.
+      if (activePopularityFilter === 'hot') fn = fn.filter(n => (n as any).popularity > 85);
+      else if (activePopularityFilter === 'rising') fn = fn.filter(n => (n as any).popularity > 70 && (n as any).popularity <= 85);
+      else fn = fn.filter(n => (n as any).popularity <= 70);
+    }
+
+    if (activeCategoryFilter) {
+      fn = fn.filter(n => n.tags.includes(activeCategoryFilter));
+    }
+
+    if (activeTimeRange) {
+      const [start, end] = activeTimeRange;
+      fn = fn.filter(n => {
+        const y = new Date(n.foundedAt).getFullYear();
+        return y >= start && y <= end;
+      });
+    }
+    
+    if (activeRelationFilter) {
+      fe = fe.filter(e => e.relationType === activeRelationFilter);
+      const connected = new Set<string>();
+      fe.forEach(e => { connected.add(e.sourceId); connected.add(e.targetId); });
+      fn = fn.filter(n => connected.has(n.id));
+    }
+
+    if (!activeRelationFilter) {
+      const fnIds = new Set(fn.map(n => n.id));
+      fe = edges.filter(e => fnIds.has(e.sourceId) && fnIds.has(e.targetId));
+    }
+    
+    set({ filteredNodes: fn, filteredEdges: fe });
+  }
+}));

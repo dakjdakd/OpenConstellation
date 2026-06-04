@@ -1,0 +1,306 @@
+import { GraphData } from './types';
+
+export const mockData: GraphData = {
+  nodes: [
+    {
+      id: 'openai',
+      name: 'OpenAI',
+      type: 'Company',
+      subtitle: 'AI Research Laboratory',
+      description: 'OpenAI is an AI research and deployment company dedicated to ensuring that artificial general intelligence benefits all of humanity.',
+      foundedAt: '2015-12-11',
+      founders: ['Sam Altman', 'Ilya Sutskever', 'Greg Brockman', 'Wojciech Zaremba', 'John Schulman', 'Elon Musk'],
+      country: 'USA',
+      tags: ['LLM', 'Research', 'AGI'],
+      popularity: 10,
+      status: 'Active',
+      website: 'https://openai.com',
+      aiConfidence: 0.98,
+      events: [
+        { date: '2015-12-11', title: 'OpenAI Founded', description: 'OpenAI was founded in San Francisco by Sam Altman, Elon Musk, and others, with US$1 billion in pledges.' },
+        { date: '2018-06-11', title: 'GPT-1 Released', description: 'OpenAI published "Improving Language Understanding by Generative Pre-Training", introducing the original GPT model.' },
+        { date: '2019-03-11', title: 'Transition to "Capped-Profit"', description: 'OpenAI shifted from non-profit to a capped-for-profit structure.' },
+        { date: '2022-11-30', title: 'ChatGPT Launched', description: 'ChatGPT was launched globally, gaining 1 million users in just 5 days.' }
+      ]
+    },
+    {
+      id: 'chatgpt',
+      name: 'ChatGPT',
+      type: 'Product',
+      subtitle: 'Conversational AI System',
+      description: 'ChatGPT is a conversational model from OpenAI that is formulated to converse safely and effectively.',
+      foundedAt: '2022-11-30',
+      tags: ['Chatbot', 'LLM', 'Productivity'],
+      popularity: 10,
+      status: 'Active',
+      website: 'https://chat.openai.com'
+    },
+    {
+      id: 'gpt4',
+      name: 'GPT-4',
+      type: 'Model',
+      subtitle: 'Multimodal Large Language Model',
+      description: 'GPT-4 is OpenAI’s most advanced system, producing safer and more useful responses.',
+      tags: ['Multimodal', 'LLM', 'Foundation Model'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'anthropic',
+      name: 'Anthropic',
+      type: 'Company',
+      subtitle: 'AI Safety & Research',
+      description: 'Anthropic is an AI safety and research company that builds reliable, interpretable, and steerable AI systems.',
+      foundedAt: '2021-01-01',
+      founders: ['Dario Amodei', 'Daniela Amodei', 'Tom Brown', 'Chris Olah', 'Sam McCandlish', 'Jack Clark', 'Jared Kaplan'],
+      country: 'USA',
+      tags: ['LLM', 'Safety', 'Research'],
+      popularity: 9,
+      status: 'Active',
+      website: 'https://anthropic.com',
+      aiConfidence: 0.95,
+      events: [
+        { date: '2021-01-01', title: 'Anthropic Founded', description: 'Anthropic was founded by former OpenAI members, prioritizing AI safety and alignment research.' },
+        { date: '2023-03-14', title: 'Claude Released', description: 'Anthropic released its first AI assistant, Claude, emphasizing a constitutional AI approach.' },
+        { date: '2023-09-25', title: 'Amazon Investment', description: 'Amazon announced an investment of up to $4 billion in Anthropic.' },
+        { date: '2024-03-04', title: 'Claude 3 Family', description: 'Anthropic introduced the Claude 3 model family (Haiku, Sonnet, Opus), achieving state-of-the-art benchmarks.' }
+      ]
+    },
+    {
+      id: 'claude3',
+      name: 'Claude 3',
+      type: 'Model',
+      subtitle: 'Next Generation AI Model Family',
+      description: 'Claude 3 is a family of foundation models by Anthropic (Opus, Sonnet, Haiku) offering strong performance and safety.',
+      tags: ['LLM', 'Foundation Model'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'claude',
+      name: 'Claude',
+      type: 'Product',
+      subtitle: 'AI Assistant by Anthropic',
+      description: 'Claude is a next-generation AI assistant built for work and designed to be safe, accurate, and secure.',
+      tags: ['Chatbot', 'Productivity'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'google',
+      name: 'Google',
+      type: 'Company',
+      subtitle: 'Search & Technology Giant',
+      description: 'Google is a multinational technology company focusing on search, cloud computing, computer software, quantum computing, e-commerce, and AI.',
+      country: 'USA',
+      tags: ['Search', 'Cloud', 'AI', 'Infra'],
+      popularity: 10,
+      status: 'Active',
+      aiConfidence: 0.99,
+      events: [
+        { date: '1998-09-04', title: 'Google Founded', description: 'Google was founded by Larry Page and Sergey Brin.' },
+        { date: '2014-01-26', title: 'DeepMind Acquisition', description: 'Google acquired DeepMind Technologies for over $500 million.' },
+        { date: '2017-06-12', title: 'Transformer Published', description: 'Google Brain researchers published the "Attention Is All You Need" paper.' },
+        { date: '2023-12-06', title: 'Gemini Announcement', description: 'Google announced the Gemini multimodal AI models.' }
+      ]
+    },
+    {
+      id: 'gemini',
+      name: 'Gemini',
+      type: 'Model',
+      subtitle: 'Google’s Multimodal AI',
+      description: 'Gemini is the largest and most capable AI model from Google DeepMind, designed to be highly multimodal.',
+      tags: ['Multimodal', 'LLM'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'transformer',
+      name: 'Transformer',
+      type: 'Technology',
+      subtitle: 'Attention-based Neural Network Architecture',
+      description: 'The Transformer is a deep learning architecture based on attention mechanisms, introduced in "Attention Is All You Need".',
+      foundedAt: '2017-06-12',
+      tags: ['Architecture', 'Deep Learning'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'attention-is-all-you-need',
+      name: 'Attention Is All You Need',
+      type: 'Research',
+      subtitle: 'Seminal AI Paper',
+      description: 'The research paper published by Google researchers that introduced the Transformer architecture.',
+      tags: ['Paper', 'NLP'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'cursor',
+      name: 'Cursor',
+      type: 'Product',
+      subtitle: 'The AI Code Editor',
+      description: 'Cursor is an AI-powered code editor built to make you extraordinarily productive.',
+      tags: ['Code', 'IDE', 'DevTool'],
+      popularity: 8,
+      status: 'Active',
+      website: 'https://cursor.com'
+    },
+    {
+      id: 'github-copilot',
+      name: 'GitHub Copilot',
+      type: 'Product',
+      subtitle: 'Your AI Pair Programmer',
+      description: 'GitHub Copilot uses the OpenAI Codex to suggest code and entire functions in real-time.',
+      tags: ['Code', 'Assistant', 'DevTool'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'meta',
+      name: 'Meta',
+      type: 'Company',
+      subtitle: 'Social Technology Company',
+      description: 'Meta builds technologies that help people connect, find communities, and grow businesses, and is a major player in open-source AI.',
+      country: 'USA',
+      tags: ['Social', 'VR', 'AI', 'Open Source'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'llama3',
+      name: 'Llama 3',
+      type: 'Open Source',
+      subtitle: 'Open Foundation Model',
+      description: 'Meta Llama 3 is a widely used open-weights large language model optimized for dialogue and general capabilities.',
+      tags: ['LLM', 'Open Weights'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'huggingface',
+      name: 'Hugging Face',
+      type: 'Company',
+      subtitle: 'The AI community building the future',
+      description: 'Hugging Face is an open-source data science and machine learning platform that acts as a hub for AI models and datasets.',
+      foundedAt: '2016-01-01',
+      country: 'USA',
+      tags: ['Platform', 'Open Source', 'Community'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'pytorch',
+      name: 'PyTorch',
+      type: 'Open Source',
+      subtitle: 'Deep Learning Framework',
+      description: 'An open source machine learning framework that accelerates the path from research prototyping to production deployment.',
+      tags: ['Framework', 'ML'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'ilya-sutskever',
+      name: 'Ilya Sutskever',
+      type: 'Person',
+      subtitle: 'AI Researcher & Co-founder',
+      description: 'Ilya Sutskever is an influential AI researcher, co-founder of OpenAI, and key contributor to many deep learning breakthroughs.',
+      tags: ['Researcher', 'Founder'],
+      popularity: 8,
+      status: 'Active'
+    },
+    {
+      id: 'sam-altman',
+      name: 'Sam Altman',
+      type: 'Person',
+      subtitle: 'CEO of OpenAI',
+      description: 'Entrepreneur and investor, known as the CEO of OpenAI.',
+      tags: ['Executive', 'Investor'],
+      popularity: 10,
+      status: 'Active'
+    },
+    {
+      id: 'dario-amodei',
+      name: 'Dario Amodei',
+      type: 'Person',
+      subtitle: 'CEO of Anthropic',
+      description: 'Co-founder and CEO of Anthropic, former VP of Research at OpenAI.',
+      tags: ['Executive', 'Researcher'],
+      popularity: 7,
+      status: 'Active'
+    },
+    {
+      id: 'xai',
+      name: 'xAI',
+      type: 'Company',
+      subtitle: 'Understand the Universe',
+      description: 'xAI is an artificial intelligence company founded by Elon Musk, aiming to understand the true nature of the universe.',
+      foundedAt: '2023-07-12',
+      founders: ['Elon Musk'],
+      country: 'USA',
+      tags: ['LLM', 'Research'],
+      popularity: 8,
+      status: 'Active'
+    },
+    {
+      id: 'grok',
+      name: 'Grok',
+      type: 'Product',
+      subtitle: 'AI Assistant by xAI',
+      description: 'Grok is an AI modeled after the Hitchhiker\'s Guide to the Galaxy, intended to answer almost anything with a bit of wit.',
+      tags: ['Chatbot', 'LLM'],
+      popularity: 7,
+      status: 'Active'
+    },
+    {
+      id: 'midjourney',
+      name: 'Midjourney',
+      type: 'Company',
+      subtitle: 'Independent Research Lab',
+      description: 'Midjourney is an independent research lab exploring new mediums of thought and expanding the imaginative powers of the human species.',
+      country: 'USA',
+      tags: ['Image Generation', 'Research'],
+      popularity: 9,
+      status: 'Active'
+    },
+    {
+      id: 'diffusion',
+      name: 'Diffusion Models',
+      type: 'Technology',
+      subtitle: 'Generative Models',
+      description: 'Diffusion models are a class of latent variable models applied in image generation, audio synthesis, and more.',
+      tags: ['Generative AI', 'Math'],
+      popularity: 9,
+      status: 'Active'
+    }
+  ],
+  edges: [
+    { id: 'e1', sourceId: 'openai', targetId: 'gpt4', relationType: 'built_on', weight: 1 },
+    { id: 'e2', sourceId: 'openai', targetId: 'chatgpt', relationType: 'built_on', weight: 1 },
+    { id: 'e3', sourceId: 'gpt4', targetId: 'chatgpt', relationType: 'powered_by', weight: 1 },
+    { id: 'e4', sourceId: 'sam-altman', targetId: 'openai', relationType: 'founded_by', weight: 1 },
+    { id: 'e5', sourceId: 'ilya-sutskever', targetId: 'openai', relationType: 'founded_by', weight: 1 },
+    { id: 'e6', sourceId: 'dario-amodei', targetId: 'anthropic', relationType: 'founded_by', weight: 1 },
+    { id: 'e7', sourceId: 'anthropic', targetId: 'claude3', relationType: 'built_on', weight: 1 },
+    { id: 'e8', sourceId: 'anthropic', targetId: 'claude', relationType: 'built_on', weight: 1 },
+    { id: 'e9', sourceId: 'claude3', targetId: 'claude', relationType: 'powered_by', weight: 1 },
+    { id: 'e10', sourceId: 'openai', targetId: 'anthropic', relationType: 'competes_with', weight: 1 },
+    { id: 'e11', sourceId: 'chatgpt', targetId: 'claude', relationType: 'competes_with', weight: 1 },
+    { id: 'e12', sourceId: 'google', targetId: 'gemini', relationType: 'built_on', weight: 1 },
+    { id: 'e13', sourceId: 'google', targetId: 'openai', relationType: 'competes_with', weight: 1 },
+    { id: 'e14', sourceId: 'google', targetId: 'attention-is-all-you-need', relationType: 'built_on', weight: 1 },
+    { id: 'e15', sourceId: 'attention-is-all-you-need', targetId: 'transformer', relationType: 'related_to', weight: 1 },
+    { id: 'e16', sourceId: 'transformer', targetId: 'gpt4', relationType: 'uses', weight: 1 },
+    { id: 'e17', sourceId: 'transformer', targetId: 'claude3', relationType: 'uses', weight: 1 },
+    { id: 'e18', sourceId: 'transformer', targetId: 'gemini', relationType: 'uses', weight: 1 },
+    { id: 'e19', sourceId: 'meta', targetId: 'llama3', relationType: 'built_on', weight: 1 },
+    { id: 'e20', sourceId: 'meta', targetId: 'pytorch', relationType: 'built_on', weight: 1 },
+    { id: 'e21', sourceId: 'gpt4', targetId: 'github-copilot', relationType: 'powered_by', weight: 1 },
+    { id: 'e22', sourceId: 'claude3', targetId: 'cursor', relationType: 'powered_by', weight: 1 },
+    { id: 'e23', sourceId: 'cursor', targetId: 'github-copilot', relationType: 'competes_with', weight: 1 },
+    { id: 'e24', sourceId: 'huggingface', targetId: 'llama3', relationType: 'related_to', weight: 1 },
+    { id: 'e25', sourceId: 'xai', targetId: 'grok', relationType: 'built_on', weight: 1 },
+    { id: 'e26', sourceId: 'xai', targetId: 'openai', relationType: 'competes_with', weight: 1 },
+    { id: 'e27', sourceId: 'diffusion', targetId: 'midjourney', relationType: 'uses', weight: 1 }
+  ]
+};

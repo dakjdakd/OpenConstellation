@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "OpenConstellation",
+  "description": "Map the AI Universe - A constellation map of the AI world.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

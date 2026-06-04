@@ -1,55 +1,50 @@
-export type SkillActivation = "enabled" | "manual_only" | "disabled";
+export type NodeType = 'Company' | 'Product' | 'Model' | 'Person' | 'Technology' | 'Open Source' | 'Research' | 'Investor';
+export type RelationType = 'founded_by' | 'competes_with' | 'uses' | 'inspired_by' | 'invested_in' | 'built_on' | 'acquired' | 'powered_by' | 'related_to';
 
-export type SkillEntry = {
+export interface GraphNode {
   id: string;
   name: string;
-  platform: "codex" | "claude-code" | "generic";
-  category: string;
+  type: NodeType;
+  subtitle: string;
   description: string;
-  sourcePath?: string;
-  defaultActivation: "auto_candidate" | "manual_candidate" | "disabled_candidate";
-  risk: "low" | "medium" | "high";
-  tags?: string[];
-};
+  logo?: string;
+  website?: string;
+  github?: string;
+  foundedAt?: string;
+  founders?: string[];
+  country?: string;
+  tags: string[];
+  popularity: number; // 1 to 10
+  status: 'Active' | 'Defunct' | 'Acquired' | 'Merged';
+  relatedTechnology?: string[];
+  sourceList?: string[];
+  aiSummary?: string;
+  aiConfidence?: number;
+  events?: { date: string, title?: string, description: string }[];
+  // Visual positions, populated by d3 simulation
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
 
-export type ProjectSkillState = {
-  skillId: string;
-  activation: SkillActivation;
-  reason?: string;
-};
-
-export type SkillConflictRule = {
+export interface GraphEdge {
   id: string;
-  skills: string[];
-  resolution: "prefer" | "split_responsibility" | "manual" | "disable_all";
-  preferredSkillId?: string;
-  responsibilities?: Record<string, string>;
-  reason?: string;
-};
-
-export type ProjectSkillProfile = {
-  id: string;
-  version: string;
-  projectName: string;
-  projectPath: string;
+  sourceId: string;
+  targetId: string;
+  relationType: RelationType;
+  weight: number;
   description?: string;
-  repositoryType?: string;
-  framework?: string;
-  language?: string;
-  defaultMode: string;
-  requirement?: string;
-  detectedProjectType?: string;
-  targets: Array<"codex" | "claude-code" | "generic">;
-  skills: ProjectSkillState[];
-  conflicts: SkillConflictRule[];
-  createdAt: string;
-  updatedAt: string;
-};
+  sourceList?: string[];
+  confidence?: number;
+  // D3 maps sourceId/targetId to object references during simulation
+  source?: GraphNode | string;
+  target?: GraphNode | string;
+}
 
-export type GlobalSettings = {
-  skillSources: string;
-  defaultTargets: Array<"codex" | "claude-code" | "generic">;
-  outputPrefs: string[];
-  isCRT?: boolean;
-  hasBooted?: boolean;
-};
+export interface GraphData {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
