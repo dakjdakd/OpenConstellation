@@ -7,6 +7,7 @@ import TechTree from './components/TechTree';
 import Saved from './components/Saved';
 import About from './components/About';
 import NodeProfile from './components/NodeProfile';
+import ReviewPanel from './components/ReviewPanel';
 import SearchExplorer from './components/SearchExplorer';
 import { useAppStore } from './store';
 
@@ -19,7 +20,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="w-screen h-screen flex flex-col bg-transparent overflow-hidden">
+      <div className="w-screen h-dvh flex flex-col bg-transparent overflow-hidden">
         <TopNav />
         <main className="flex-1 relative overflow-hidden">
           <Routes>
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/timeline" element={<Timeline />} />
             <Route path="/tech" element={<TechTree />} />
             <Route path="/saved" element={<Saved />} />
+            <Route path="/review" element={<ReviewPanel />} />
             <Route path="/about" element={<About />} />
           </Routes>
         </main>

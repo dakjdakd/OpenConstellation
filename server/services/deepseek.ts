@@ -36,6 +36,48 @@ export interface AiProviderProbe {
   providerHttpStatus?: number;
 }
 
+export interface StructuredNodeDraft {
+  provider: 'deepseek' | 'fallback';
+  model: string;
+  confidence: number;
+  source: string;
+  editable: boolean;
+  node: {
+    name: string;
+    type: string;
+    subtitle: string;
+    description: string;
+    website?: string;
+    github?: string;
+    foundedAt?: string;
+    founders?: string[];
+    country?: string;
+    tags: string[];
+    popularity: number;
+    status: string;
+    relatedTechnology?: string[];
+    sourceList: string[];
+    aiSummary: string;
+    aiConfidence: number;
+    events?: Array<{ date: string; title?: string; description: string }>;
+  };
+  edges: Array<{
+    targetId: string;
+    relationType: string;
+    description?: string;
+    confidence?: number;
+    sourceList?: string[];
+  }>;
+  sources: Array<{
+    url: string;
+    title?: string;
+    publisher?: string;
+    kind?: string;
+    trustLevel?: string;
+  }>;
+  metadata: Record<string, unknown>;
+}
+
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -212,6 +254,108 @@ export async function generateAiResult(payload: AiRequestPayload): Promise<AiRes
   }
 }
 
+export async function generateStructuredNodeDraft(payload: {
+  query: string;
+  existingNodes: Array<{ id: string; name: string; type: string; tags: string[]; subtitle?: string }>;
+}): Promise<StructuredNodeDraft> {
+  const config = getAiConfig();
+  const query = payload.query.trim();
+
+  if (!config.apiKey) {
+    return buildFallbackNodeDraft(query, payload.existingNodes, 'provider_unconfigured');
+  }
+
+  const messages: ChatMessage[] = [
+    {
+      role: 'system',
+      content:
+        'You draft editable OpenConstellation knowledge graph nodes for AI ecosystem entities. Return only compact JSON. Do not invent primary-source URLs; include only URLs you are confident are real.',
+    },
+    {
+      role: 'user',
+      content: JSON.stringify({
+        query,
+        existing_nodes: payload.existingNodes.slice(0, 80),
+        output_contract: {
+          node: {
+            name: 'canonical entity name',
+            type: 'one of Company, Product, Model, Person, Technology, Open Source, Research, Investor',
+            subtitle: 'short factual subtitle',
+            description: '2-3 sentence neutral profile',
+            website: 'optional official website URL',
+            github: 'optional GitHub URL',
+            foundedAt: 'optional ISO date or year string',
+            founders: ['optional founder names'],
+            country: 'optional country or region',
+            tags: ['3-8 concise tags'],
+            popularity: 'integer 1-10',
+            status: 'Active, Defunct, Acquired, or Merged',
+            relatedTechnology: ['optional technology tags'],
+            sourceList: ['official/source URLs only if known'],
+            aiSummary: 'one sentence explaining why this node belongs in the AI graph',
+            aiConfidence: 'number 0-1',
+            events: [{ date: 'ISO date or year-date', title: 'optional title', description: 'short event description' }],
+          },
+          edges: [
+            {
+              targetId: 'id from existing_nodes only',
+              relationType: 'one of founded_by, competes_with, uses, inspired_by, invested_in, built_on, acquired, powered_by, related_to',
+              description: 'short relationship rationale',
+              confidence: 'number 0-1',
+              sourceList: ['source URLs only if known'],
+            },
+          ],
+          sources: [{ url: 'source URL', title: 'source title', publisher: 'publisher', kind: 'official/github/paper/wiki/news/api', trustLevel: 'primary/secondary/community/unverified' }],
+          confidence: 'overall draft confidence 0-1',
+          metadata: { source_tags: ['deepseek', 'ai-generated', 'pending-review'] },
+        },
+      }),
+    },
+  ];
+
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages,
+        temperature: 0.2,
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    if (!response.ok) {
+      return buildFallbackNodeDraft(query, payload.existingNodes, `provider_http_${response.status}`);
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const parsed = parseProviderJson(data.choices?.[0]?.message?.content ?? '');
+    const normalized = normalizeStructuredNodeDraft(parsed, query, payload.existingNodes);
+
+    return {
+      ...normalized,
+      provider: 'deepseek',
+      model: config.model,
+      source: 'deepseek_openai_compatible',
+      editable: true,
+      metadata: {
+        baseUrl: config.baseUrl,
+        source_tags: ['deepseek', 'openai-compatible', 'ai-generated', 'pending-review'],
+        editable_fields: ['node', 'edges', 'sources', 'confidence'],
+        ...(isRecord(parsed.metadata) ? parsed.metadata : {}),
+      },
+    };
+  } catch (error) {
+    return buildFallbackNodeDraft(query, payload.existingNodes, error instanceof Error ? error.message : 'provider_error');
+  }
+}
+
 function parseProviderJson(content: string): Record<string, unknown> {
   try {
     return JSON.parse(content) as Record<string, unknown>;
@@ -288,6 +432,142 @@ function normalizeSuggestions(value: unknown, payload: AiRequestPayload) {
 function clampConfidence(value: unknown, fallback: number) {
   if (typeof value !== 'number' || Number.isNaN(value)) return fallback;
   return Math.min(1, Math.max(0, value));
+}
+
+function buildFallbackNodeDraft(
+  query: string,
+  existingNodes: Array<{ id: string; name: string; type: string; tags: string[] }>,
+  reason: string,
+): StructuredNodeDraft {
+  const config = getAiConfig();
+  const neighbor = existingNodes.find((node) => node.tags.some((tag) => /agent|model|llm|ai/i.test(tag))) ?? existingNodes[0];
+  return {
+    provider: 'fallback',
+    model: config.model,
+    confidence: 0.58,
+    source: reason,
+    editable: true,
+    node: {
+      name: query,
+      type: 'Product',
+      subtitle: 'AI ecosystem entity pending review',
+      description: `${query} was requested from search but is not yet present in the curated graph. This AI-generated draft is intentionally conservative and must be verified before approval.`,
+      tags: ['AI', 'Pending Review'],
+      popularity: 4,
+      status: 'Active',
+      relatedTechnology: ['AI'],
+      sourceList: [],
+      aiSummary: `${query} is an editable draft generated from an empty search result and should be reviewed against primary sources.`,
+      aiConfidence: 0.58,
+      events: [],
+    },
+    edges: neighbor
+      ? [
+          {
+            targetId: neighbor.id,
+            relationType: 'related_to',
+            description: `Fallback draft links ${query} to ${neighbor.name} as a nearby review candidate.`,
+            confidence: 0.45,
+            sourceList: [],
+          },
+        ]
+      : [],
+    sources: [],
+    metadata: {
+      baseUrl: config.baseUrl,
+      source_tags: ['local-fallback', 'ai-generated', 'pending-review'],
+      editable_fields: ['node', 'edges', 'sources', 'confidence'],
+      reason,
+    },
+  };
+}
+
+function normalizeStructuredNodeDraft(
+  parsed: Record<string, unknown>,
+  query: string,
+  existingNodes: Array<{ id: string; name: string; type: string; tags: string[] }>,
+): Omit<StructuredNodeDraft, 'provider' | 'model' | 'source' | 'editable' | 'metadata'> {
+  const rawNode = isRecord(parsed.node) ? parsed.node : {};
+  const sourceList = asUrlArray(rawNode.sourceList);
+  const sources = Array.isArray(parsed.sources)
+    ? parsed.sources.filter(isRecord).map((source) => ({
+        url: normalizeUrl(source.url),
+        title: normalizeText(source.title, ''),
+        publisher: normalizeText(source.publisher, ''),
+        kind: normalizeText(source.kind, ''),
+        trustLevel: normalizeText(source.trustLevel, ''),
+      })).filter((source) => source.url)
+    : [];
+  const sourceUrls = [...new Set([...sourceList, ...sources.map((source) => source.url)])];
+  const existingIds = new Set(existingNodes.map((node) => node.id));
+  const edges = Array.isArray(parsed.edges)
+    ? parsed.edges.filter(isRecord).map((edge) => ({
+        targetId: normalizeText(edge.targetId, ''),
+        relationType: normalizeText(edge.relationType, 'related_to'),
+        description: normalizeText(edge.description, ''),
+        confidence: clampConfidence(edge.confidence, 0.62),
+        sourceList: asUrlArray(edge.sourceList),
+      })).filter((edge) => existingIds.has(edge.targetId))
+    : [];
+
+  return {
+    confidence: clampConfidence(parsed.confidence, 0.74),
+    node: {
+      name: normalizeText(rawNode.name, query),
+      type: normalizeText(rawNode.type, 'Product'),
+      subtitle: normalizeText(rawNode.subtitle, 'AI ecosystem entity pending review'),
+      description: normalizeText(rawNode.description, `${query} is an AI ecosystem entity drafted from an empty graph search and pending human review.`),
+      website: normalizeUrl(rawNode.website) || undefined,
+      github: normalizeUrl(rawNode.github) || undefined,
+      foundedAt: normalizeText(rawNode.foundedAt, '') || undefined,
+      founders: asStringList(rawNode.founders),
+      country: normalizeText(rawNode.country, '') || undefined,
+      tags: asStringList(rawNode.tags).slice(0, 8),
+      popularity: clampInteger(rawNode.popularity, 4, 1, 10),
+      status: normalizeText(rawNode.status, 'Active'),
+      relatedTechnology: asStringList(rawNode.relatedTechnology),
+      sourceList: sourceUrls,
+      aiSummary: normalizeText(rawNode.aiSummary, `${query} is an editable AI-generated draft pending source review.`),
+      aiConfidence: clampConfidence(rawNode.aiConfidence, clampConfidence(parsed.confidence, 0.74)),
+      events: normalizeEvents(rawNode.events),
+    },
+    edges,
+    sources,
+  };
+}
+
+function normalizeUrl(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : '';
+  } catch {
+    return '';
+  }
+}
+
+function asUrlArray(value: unknown) {
+  return Array.isArray(value) ? [...new Set(value.map(normalizeUrl).filter(Boolean))] : [];
+}
+
+function asStringList(value: unknown) {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim())
+    : [];
+}
+
+function clampInteger(value: unknown, fallback: number, min: number, max: number) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+function normalizeEvents(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isRecord).map((event) => ({
+    date: normalizeText(event.date, ''),
+    title: normalizeText(event.title, '') || undefined,
+    description: normalizeText(event.description, ''),
+  })).filter((event) => event.date && event.description).slice(0, 5);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

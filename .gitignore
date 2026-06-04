@@ -8,3 +8,5 @@ coverage/
 .env*
 !.env.example
 server/data/user-state.json
+server/data/source-store.json
+server/data/override-store.json

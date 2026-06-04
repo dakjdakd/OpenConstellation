@@ -60,6 +60,70 @@ export interface UserConstellation {
   searchHistory: string[];
 }
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+export type SourceKind = 'official' | 'github' | 'paper' | 'wiki' | 'news' | 'manual' | 'api';
+export type TrustLevel = 'primary' | 'secondary' | 'community' | 'unverified';
+
+export interface SourceRecord {
+  id: string;
+  url: string;
+  kind: SourceKind;
+  title: string;
+  publisher?: string;
+  fetchedAt: string;
+  trustLevel: TrustLevel;
+  reviewStatus: ReviewStatus;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ImportBatch {
+  id: string;
+  provider: 'json' | 'github' | 'manual';
+  status: ReviewStatus;
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  query?: string;
+  mode: 'merge' | 'replace';
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  sources: SourceRecord[];
+  summary: {
+    importedNodes: number;
+    importedEdges: number;
+    importedSources: number;
+    warnings: string[];
+  };
+  notes?: string;
+}
+
+export interface ImportBatchListResponse {
+  items: ImportBatch[];
+  total: number;
+}
+
+export interface SourceListResponse {
+  items: SourceRecord[];
+  total: number;
+}
+
+export interface AiSearchDraftResponse {
+  batch: ImportBatch;
+  draft: {
+    provider: 'deepseek' | 'fallback';
+    model: string;
+    confidence: number;
+    source: string;
+    editable: boolean;
+    metadata: Record<string, unknown>;
+  };
+  metadata: {
+    status: 'pending_review';
+    message: string;
+  };
+}
+
 const DEFAULT_CONSTELLATION: UserConstellation = {
   favorites: [],
   collections: [
@@ -220,6 +284,38 @@ export async function saveSearchHistory(query: string) {
 export async function clearSearchHistoryRemote() {
   return requestJson<UserConstellation>('/api/me/search-history', {
     method: 'DELETE',
+  });
+}
+
+export async function fetchImportBatches(status?: ReviewStatus): Promise<ImportBatchListResponse> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return requestJson<ImportBatchListResponse>(`/api/import-batches${query}`);
+}
+
+export async function fetchSources(reviewStatus?: ReviewStatus): Promise<SourceListResponse> {
+  const query = reviewStatus ? `?reviewStatus=${encodeURIComponent(reviewStatus)}` : '';
+  return requestJson<SourceListResponse>(`/api/sources${query}`);
+}
+
+export async function importGithubRepository(repo: string): Promise<{ batch: ImportBatch; metadata?: Record<string, unknown> }> {
+  return postJson<{ batch: ImportBatch; metadata?: Record<string, unknown> }>('/api/graph/import/github', { repo });
+}
+
+export async function createAiSearchDraft(query: string): Promise<AiSearchDraftResponse> {
+  return postJson<AiSearchDraftResponse>('/api/search/draft', { query });
+}
+
+export async function approveImportBatch(batchId: string) {
+  return postJson<{ batch: ImportBatch; graph: GraphData; metadata: { totalNodes: number; totalEdges: number } }>(
+    `/api/import-batches/${encodeURIComponent(batchId)}/approve`,
+    { reviewedBy: 'frontend-review' },
+  );
+}
+
+export async function rejectImportBatch(batchId: string, notes?: string) {
+  return postJson<ImportBatch>(`/api/import-batches/${encodeURIComponent(batchId)}/reject`, {
+    reviewedBy: 'frontend-review',
+    notes,
   });
 }
 

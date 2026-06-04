@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Compass, BookOpen, Clock, Info, Hexagon, Network } from 'lucide-react';
+import { Compass, BookOpen, Clock, Database, Info, Hexagon, Network } from 'lucide-react';
 import { useAppStore } from '../store';
 import { Link, useLocation } from 'react-router-dom';
 import SearchDropdown from './SearchDropdown';
@@ -50,6 +50,10 @@ export default function TopNav() {
         <Link to="/saved" className={navClass('/saved')}>
           <BookOpen className="w-4 h-4 shrink-0" />
           <span className="hidden lg:inline">Saved</span>
+        </Link>
+        <Link to="/review" className={navClass('/review')}>
+          <Database className="w-4 h-4 shrink-0" />
+          <span className="hidden lg:inline">Review</span>
         </Link>
         <div className="w-px h-4 bg-gray-200 shrink-0 hidden sm:block"></div>
         <Link to="/about" className={`transition-colors shrink-0 ${location.pathname === '/about' ? 'text-black' : 'text-gray-400 hover:text-black'}`} title="Help / About">

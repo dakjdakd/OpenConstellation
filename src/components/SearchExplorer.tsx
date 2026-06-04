@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Zap, Box, Compass } from 'lucide-react';
+import { Zap, Box, Compass, Sparkles, ArrowRight } from 'lucide-react';
 import AIGenerationBlock from './AIGenerationBlock';
-import { fetchSearchResults, type AiResult } from '../api';
+import { createAiSearchDraft, fetchSearchResults, type AiResult, type ImportBatch } from '../api';
 import type { GraphNode } from '../types';
 
 export default function SearchExplorer() {
@@ -15,6 +15,9 @@ export default function SearchExplorer() {
   const [aiInterpretation, setAiInterpretation] = useState<AiResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [draftBatch, setDraftBatch] = useState<ImportBatch | null>(null);
+  const [isCreatingDraft, setIsCreatingDraft] = useState(false);
+  const [draftError, setDraftError] = useState<string | null>(null);
 
   const results = apiResults ?? [];
 
@@ -23,6 +26,8 @@ export default function SearchExplorer() {
     setApiResults(null);
     setAiInterpretation(null);
     setSearchError(null);
+    setDraftBatch(null);
+    setDraftError(null);
 
     if (!rawQuery.trim()) {
       setIsSearching(false);
@@ -45,6 +50,20 @@ export default function SearchExplorer() {
       cancelled = true;
     };
   }, [rawQuery, addSearchHistory]);
+
+  const handleCreateDraft = async () => {
+    if (!rawQuery.trim() || isCreatingDraft) return;
+    setIsCreatingDraft(true);
+    setDraftError(null);
+    try {
+      const response = await createAiSearchDraft(rawQuery);
+      setDraftBatch(response.batch);
+    } catch (error) {
+      setDraftError(error instanceof Error ? error.message : 'AI draft request failed.');
+    } finally {
+      setIsCreatingDraft(false);
+    }
+  };
 
   return (
     <div className="w-full h-full pt-14 flex overflow-hidden grid-bg">
@@ -85,10 +104,40 @@ export default function SearchExplorer() {
                 <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 break-all">{searchError}</p>
              </div>
           ) : results.length === 0 && !isSearching ? (
-             <div className="border border-gray-200 p-12 text-center bg-white">
-                <Box className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="font-serif text-2xl mb-2">Null Sector</h3>
-                <p className="font-sans text-gray-500">No entities match your specific coordinates.</p>
+             <div className="border border-gray-200 p-8 md:p-12 text-center bg-white">
+                <Box className="size-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl mb-2 text-balance">Null Sector</h3>
+                <p className="font-sans text-gray-500 text-pretty max-w-xl mx-auto">
+                  No curated entities match this query yet. Generate a structured AI draft and send it to the review queue before it becomes graph data.
+                </p>
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCreateDraft}
+                    disabled={isCreatingDraft || Boolean(draftBatch)}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 border border-black bg-black px-5 py-2 font-mono text-[10px] uppercase text-white disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-300"
+                  >
+                    <Sparkles className="size-3.5" />
+                    {isCreatingDraft ? 'Drafting' : draftBatch ? 'Draft Queued' : 'Generate Draft'}
+                  </button>
+                  {draftBatch ? (
+                    <Link
+                      to="/review"
+                      className="inline-flex min-h-10 items-center justify-center gap-2 border border-gray-200 bg-white px-5 py-2 font-mono text-[10px] uppercase text-black hover:border-black"
+                    >
+                      Review Queue
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  ) : null}
+                </div>
+                {draftBatch ? (
+                  <p className="mt-4 font-mono text-[10px] uppercase text-gray-500">
+                    Batch {draftBatch.id} created with {draftBatch.nodes.length} node and {draftBatch.edges.length} edge drafts.
+                  </p>
+                ) : null}
+                {draftError ? (
+                  <p className="mt-4 font-mono text-[10px] uppercase text-red-500 break-all">{draftError}</p>
+                ) : null}
              </div>
           ) : results.length === 0 ? (
              <div className="border border-gray-200 p-12 text-center bg-white">
