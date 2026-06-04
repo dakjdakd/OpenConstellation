@@ -7,27 +7,22 @@ import { fetchSearchResults, type AiResult } from '../api';
 import type { GraphNode } from '../types';
 
 export default function SearchExplorer() {
-  const { nodes, addSearchHistory } = useAppStore();
+  const { addSearchHistory } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawQuery = searchParams.get('q') || '';
   const query = rawQuery.trim().toLowerCase();
   const [apiResults, setApiResults] = useState<GraphNode[] | null>(null);
   const [aiInterpretation, setAiInterpretation] = useState<AiResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
-  const fallbackResults = query ? nodes.filter(n => 
-    n.name.toLowerCase().includes(query) ||
-    n.type.toLowerCase().includes(query) ||
-    n.subtitle.toLowerCase().includes(query) ||
-    n.description.toLowerCase().includes(query) ||
-    n.tags.some(t => t.toLowerCase().includes(query))
-  ) : [];
-  const results = apiResults ?? fallbackResults;
+  const results = apiResults ?? [];
 
   useEffect(() => {
     let cancelled = false;
     setApiResults(null);
     setAiInterpretation(null);
+    setSearchError(null);
 
     if (!rawQuery.trim()) {
       setIsSearching(false);
@@ -40,7 +35,9 @@ export default function SearchExplorer() {
       setApiResults(response.items);
       setAiInterpretation(response.aiInterpretation ?? null);
       addSearchHistory(response.query);
-    }).catch(() => undefined).finally(() => {
+    }).catch((error) => {
+      if (!cancelled) setSearchError(error instanceof Error ? error.message : 'Backend search request failed.');
+    }).finally(() => {
       if (!cancelled) setIsSearching(false);
     });
 
@@ -80,11 +77,24 @@ export default function SearchExplorer() {
                 <h3 className="font-serif text-2xl mb-2 text-gray-400">Search the Universe</h3>
                 <p className="font-sans text-gray-500">Enter a query above to explore entities, people, and technologies.</p>
              </div>
-          ) : results.length === 0 ? (
+          ) : searchError ? (
+             <div className="border border-red-200 p-12 text-center bg-white">
+                <Box className="w-12 h-12 text-red-200 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl mb-2">Backend Index Offline</h3>
+                <p className="font-sans text-gray-500 mb-3">Search now depends on the real backend graph index. Start `npm.cmd run dev:api` and retry.</p>
+                <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 break-all">{searchError}</p>
+             </div>
+          ) : results.length === 0 && !isSearching ? (
              <div className="border border-gray-200 p-12 text-center bg-white">
                 <Box className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="font-serif text-2xl mb-2">Null Sector</h3>
                 <p className="font-sans text-gray-500">No entities match your specific coordinates.</p>
+             </div>
+          ) : results.length === 0 ? (
+             <div className="border border-gray-200 p-12 text-center bg-white">
+                <Compass className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl mb-2 text-gray-400">Synchronizing Index</h3>
+                <p className="font-sans text-gray-500">Querying the backend graph and AI interpretation service.</p>
              </div>
           ) : (
             <div className="space-y-6">

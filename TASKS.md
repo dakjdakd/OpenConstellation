@@ -13,7 +13,7 @@
 ## 当前进度
 
 - 当前章节：5. 项目说明缺口审计与后续真实化任务。
-- 当前子任务：5.2 与 5.6 已完成；5.5 已完成节点、关系、事件和 sourceList 的基础可写 API，AI 人工覆盖记录仍待前端审核流补齐。
+- 当前子任务：5.2、5.3 与 5.6 已完成；正常体验不再加载前端 mock 数据，后端图谱已替换为 58 节点 / 62 边的公开来源 curated graph。
 - 验证状态：
   - `npm.cmd run lint` 通过。
   - `npm.cmd run build` 通过，只有 Vite chunk size warning。
@@ -28,9 +28,11 @@
   - 本轮补充浏览器 smoke：`/explore` 可渲染星图标题，`/saved` 可渲染收藏、合集和最近浏览区域，控制台无 error。
   - 本轮后端真实化：`npm.cmd run seed:graph` 可从前端 seed 生成独立 `server/data/graph-data.json`；`/api/graph` 读取后端 JSON 返回 23 个节点和 27 条边。
   - 本轮图谱写入 smoke：新增临时节点返回 24 个节点，添加事件返回 201，更新 sourceList 返回 200，删除临时节点后 `/api/graph` 恢复 23 个节点且无测试残留。
+  - 本轮产品化数据：`npm.cmd run seed:graph` 已替换为 curated graph 生成器，`/api/graph` 返回 58 个节点和 62 条边，58 个节点均带 `sourceList`，`/api/graph/sources` 聚合 57 条公开来源。
+  - 本轮真实数据 smoke：`/api/search?q=openai` 返回 6 条且首条为 OpenAI，`/api/nodes/openai` 返回 10 个相关节点，`/api/graph/path?from=openai&to=cursor` 返回 `openai -> gpt4o -> cursor`。
 - 注意：当前 Codex 沙箱内网络会让 DeepSeek 请求出现 `fetch failed`，但在允许外网访问的同一命令下 provider 与业务 API 均已验证成功；应用实际运行时以本机网络环境为准。
 - 注意：当前 Windows 环境用 `Start-Process` 后台启动 API 可能触发 `Path/PATH` 环境变量冲突；实际运行建议在终端直接执行 `npm.cmd run dev:api`，再另开终端执行 `npm.cmd run dev`。
-- 注意：当前后端图谱已从直接 import `src/data.ts` 拆为独立 `server/data/graph-data.json`，并支持后端持久化写入；但初始内容仍来自 23 个 seed 节点，尚未扩充到 50-100 个节点，也尚未接入 Wikidata/GitHub/arXiv 等真实外部自动数据源。
+- 注意：当前正常前端体验依赖后端 API 和 curated public-source graph；仅当显式设置 `VITE_ENABLE_MOCK_FALLBACK=true` 时才允许开发兜底读取前端 mock。尚未完成的是 Wikidata/GitHub/arXiv 等自动外部抓取、导入审核流和数据库级并发控制。
 
 ## 任务清单
 
@@ -58,7 +60,7 @@
 - [ ] 5. 项目说明缺口审计与后续真实化任务
   - [x] 5.1 盘点当前项目中仍未真正实现、仍使用 seed/mock/fallback 或仅 UI 展示的功能。
   - [x] 5.2 将后端图谱数据源从 `src/data.ts` 前端 seed 拆出为独立后端数据层，例如 `server/data/graph-data.json`、SQLite 或 Postgres，并提供迁移脚本。
-  - [ ] 5.3 扩充初版图谱规模到项目说明要求的 50-100 个节点，并补齐 `sourceList`、`confidence`、`logo`、`github`、`relatedTechnology`、`aiSummary` 等字段。
+  - [x] 5.3 扩充初版图谱规模到项目说明要求的 50-100 个节点，并补齐 `sourceList`、`confidence`、`logo`、`github`、`relatedTechnology`、`aiSummary` 等字段。
   - [ ] 5.4 实现半自动知识图谱构建闭环：搜索本地无结果时触发 AI 结构化补全，人工确认后写入统一 Node/Edge/Event/Source 模型。
   - [ ] 5.5 增加节点与关系的可编辑/可覆盖 API：创建、更新、删除 node、edge、event、source，并保留 AI 生成字段的人工覆盖记录。（后端 node/edge/event/sourceList CRUD 已完成；AI 覆盖记录与前端审核流待补）
   - [x] 5.6 接入至少一个真实公开数据来源或导入通道，例如 Wikidata/Wikipedia、GitHub、arXiv、官方站点清单或人工 CSV/JSON 导入。
@@ -74,12 +76,12 @@
 
 ## 未实现 / 假数据审计
 
-- 图谱主数据已拆到后端 JSON：`server/data/graphStore.ts` 读取并写入 `server/data/graph-data.json`，不再直接返回 `src/data.ts` 的 `mockData`；但当前 JSON 初始内容仍由 seed 迁移而来，只有 23 个节点和 27 条边，项目说明中的 50-100 初版节点、后续 500+ 扩展和真实外部数据源尚未实现。
-- 后端 API 已经真实可调用，但很多结果仍来自本地 seed 迁移数据而不是外部信息源：`/api/graph`、`/api/nodes/:id`、`/api/search`、`/api/timeline`、`/api/tech-tree` 和 `/api/graph/path` 都是在当前后端 JSON 图谱上计算。
-- 前端 API client 保留 mock fallback：`src/api.ts` 在后端不可用时会回退到 `mockData`，这是可用性兜底，不代表真实数据已接入。
+- 图谱主数据已拆到后端 JSON：`server/data/graphStore.ts` 读取并写入 `server/data/graph-data.json`，不再直接返回 `src/data.ts` 的 `mockData`；当前 JSON 是 58 节点 / 62 边的公开来源 curated graph，所有节点都有 `sourceList`、`logo`、`relatedTechnology`、`aiSummary`，边包含 `sourceList` 与 `confidence`。
+- 后端 API 已经真实可调用，结果来自后端 curated graph：`/api/graph`、`/api/nodes/:id`、`/api/search`、`/api/timeline`、`/api/tech-tree` 和 `/api/graph/path` 均在后端图谱上计算；尚未完成的是实时外部 API 自动抓取和数据库化。
+- 前端 API client 默认不再静默回退 mock：`src/api.ts` 只有在显式设置 `VITE_ENABLE_MOCK_FALLBACK=true` 时才允许开发兜底；正常产品体验会暴露后端服务错误，避免误用假数据。
 - 半自动知识图谱构建没有完整前端闭环：AI 可以生成 `complete-node`，后端也已提供 node/edge/event/sourceList 写入和 JSON import，但还没有“搜索不到 -> AI 生成结构化节点 -> 用户确认 -> 写入图谱”的前端保存流程。
 - AI 生成内容还没有人工编辑界面：结果结构里有 `editable`、`confidence` 和 `metadata.source_tags`，但前端没有重新生成、编辑、保存覆盖和审核版本记录。
-- 真实来源体系仍需扩充：后端已支持读取 `/api/graph/sources` 并维护 node/edge 的 `sourceList`，但当前节点/边大多没有可追溯的官网、论文、新闻、GitHub、Wikidata 等来源记录。
+- 真实来源体系已具备基础落点：后端支持读取 `/api/graph/sources` 并维护 node/edge 的 `sourceList`，当前 curated graph 已写入官网、论文、GitHub 或产品页来源；仍需扩展为独立 Source 实体、来源可信度、抓取时间和审核状态。
 - 搜索页左侧分类和排序仍是展示壳：Companies/Products/Models 按钮没有改变结果；自动补全、热门建议、相关话题和无结果 AI 引导也还不完整。
 - 时间线页缺少项目说明要求的控制器：年份滑条、起止年份筛选、事件类型筛选、年份对比和右侧年度 AI 总结尚未真正实现。
 - 技术树页是后端分层结果的静态展示：没有左侧技术分类、右侧说明面板、节点展开下一层、演化路径高亮和从某技术自动生成学习路径的交互。
@@ -94,10 +96,10 @@
 - `.gitignore`：忽略依赖、构建产物、环境变量、日志和运行态 `server/data/user-state.json`。
 - `.env.example`：提供 DeepSeek OpenAI-compatible 环境变量示例，包括 `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL` 和 `DEEPSEEK_MODEL`。
 - `TASKS.md`：记录 OpenConstellation 分章执行规则、当前进度、任务清单和相关文件。
-- `package.json`：提供 `dev:api` 脚本用于启动 Express API 服务，并提供 `seed:graph` 脚本用于从前端 seed 生成后端图谱 JSON。
+- `package.json`：提供 `dev:api` 脚本用于启动 Express API 服务，并提供 `seed:graph` 脚本用于生成后端公开来源 curated graph。
 - `server/app.ts`：Express 应用装配入口，挂载 health、graph、me 和 AI 路由；同时兜底加载 `.env`。
-- `scripts/seedGraphData.ts`：迁移脚本，将当前 `src/data.ts` seed 写入 `server/data/graph-data.json`，用于首次初始化或重置后端图谱数据。
-- `server/data/graph-data.json`：后端独立图谱数据文件，当前包含 23 个 seed 迁移节点和 27 条边，是 `/api/graph` 等图谱接口的运行数据源。
+- `scripts/seedCuratedGraphData.ts`：curated graph 生成脚本，维护 58 个公开来源 AI 生态节点和 62 条带来源关系，生成 `server/data/graph-data.json`。
+- `server/data/graph-data.json`：后端独立图谱数据文件，当前包含 58 个公开来源节点和 62 条边，是 `/api/graph` 等图谱接口的运行数据源。
 - `server/data/graphStore.ts`：图谱数据访问入口，读取并原子写入 `server/data/graph-data.json`，支持保存整图、upsert/delete node 和 upsert/delete edge。
 - `server/data/userStore.ts`：运行态用户星图 JSON 持久化服务，负责收藏、合集、最近查看、搜索历史和 AI 洞察缓存；写入采用临时文件加 rename 的原子替换。
 - `server/graphService.ts`：图谱筛选、节点详情、搜索、时间线、技术树和最短路径的纯逻辑服务。
@@ -107,7 +109,7 @@
 - `server/routes/health.ts`：健康检查路由，返回服务、运行时和不会泄露 key 的 AI provider 状态。
 - `server/routes/me.ts`：收藏、合集、最近查看和搜索历史 REST API；包含删除与清空接口。
 - `server/services/deepseek.ts`：DeepSeek OpenAI-compatible Chat Completions 封装、本地 fallback、provider 状态、probe 和缓存使用策略。
-- `src/api.ts`：前端 API client，封装图谱与用户星图请求，并在后端不可用时回退到 mock 数据；包含删除/清空同步方法。
+- `src/api.ts`：前端 API client，封装图谱与用户星图请求；正常模式要求后端 API 可用，仅 `VITE_ENABLE_MOCK_FALLBACK=true` 时允许开发兜底；包含删除/清空同步方法。
 - `src/App.tsx`：应用启动时触发图谱和用户状态加载，并提供 `/` 与 `/explore` 星图入口。
 - `src/components/About.tsx`：项目说明页，文案已从 mock 占位说明调整为后端 API 与 AI synthesis 的 MVP 状态。
 - `src/components/NodeProfile.tsx`：节点详情页接入 `/api/nodes/:id`、AI learning path、recommendations、complete-node，并把收藏按钮同步到后端持久化。

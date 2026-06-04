@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { GraphNode, GraphEdge } from './types';
-import { mockData } from './data';
 import {
   clearSearchHistoryRemote,
   clearRecentViewsRemote,
@@ -31,7 +30,8 @@ interface AppState {
   filteredNodes: GraphNode[];
   filteredEdges: GraphEdge[];
   isApiBacked: boolean;
-  apiStatus: 'idle' | 'loading' | 'ready' | 'fallback';
+  apiStatus: 'idle' | 'loading' | 'ready' | 'error';
+  apiError: string | null;
   loadGraphFromApi: () => Promise<void>;
   activeFilterType: string | null;
   setActiveFilterType: (type: string | null) => void;
@@ -139,34 +139,48 @@ export const useAppStore = create<AppState>((set, get) => ({
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
   showFilters: false,
   setShowFilters: (show) => set({ showFilters: show }),
-  nodes: mockData.nodes,
-  edges: mockData.edges,
-  filteredNodes: mockData.nodes,
-  filteredEdges: mockData.edges,
+  nodes: [],
+  edges: [],
+  filteredNodes: [],
+  filteredEdges: [],
   isApiBacked: false,
   apiStatus: 'idle',
+  apiError: null,
   loadGraphFromApi: async () => {
-    set({ apiStatus: 'loading' });
-    const [graph, constellation] = await Promise.all([fetchGraphData(), fetchConstellation()]);
-    set((state) => ({
-      nodes: graph.nodes,
-      edges: graph.edges,
-      favorites: constellation.favorites,
-      collections: constellation.collections,
-      recentViews: constellation.recentViews,
-      searchHistory: constellation.searchHistory,
-      isApiBacked: graph !== mockData,
-      apiStatus: graph === mockData ? 'fallback' : 'ready',
-      ...applyGraphFilters({
-        ...state,
+    set({ apiStatus: 'loading', apiError: null });
+    try {
+      const [graph, constellation] = await Promise.all([fetchGraphData(), fetchConstellation()]);
+      set((state) => ({
         nodes: graph.nodes,
         edges: graph.edges,
         favorites: constellation.favorites,
         collections: constellation.collections,
         recentViews: constellation.recentViews,
         searchHistory: constellation.searchHistory,
-      }),
-    }));
+        isApiBacked: true,
+        apiStatus: 'ready',
+        apiError: null,
+        ...applyGraphFilters({
+          ...state,
+          nodes: graph.nodes,
+          edges: graph.edges,
+          favorites: constellation.favorites,
+          collections: constellation.collections,
+          recentViews: constellation.recentViews,
+          searchHistory: constellation.searchHistory,
+        }),
+      }));
+    } catch (error) {
+      set({
+        nodes: [],
+        edges: [],
+        filteredNodes: [],
+        filteredEdges: [],
+        isApiBacked: false,
+        apiStatus: 'error',
+        apiError: error instanceof Error ? error.message : 'Unable to load backend graph data.',
+      });
+    }
   },
   activeFilterType: null,
   activeRelationFilter: null,

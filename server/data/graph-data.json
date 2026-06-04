@@ -4,8 +4,27 @@
       "id": "openai",
       "name": "OpenAI",
       "type": "Company",
-      "subtitle": "AI Research Laboratory",
-      "description": "OpenAI is an AI research and deployment company dedicated to ensuring that artificial general intelligence benefits all of humanity.",
+      "subtitle": "AI research and deployment company",
+      "description": "OpenAI develops frontier models and products including ChatGPT, GPT-4, GPT-4o, and Sora.",
+      "tags": [
+        "LLM",
+        "Frontier Models",
+        "AGI"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://openai.com/about/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openai.com",
+      "sourceList": [
+        "https://openai.com/about/"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Frontier Models",
+        "AGI"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "OpenAI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
       "foundedAt": "2015-12-11",
       "founders": [
         "Sam Altman",
@@ -16,35 +35,21 @@
         "Elon Musk"
       ],
       "country": "USA",
-      "tags": [
-        "LLM",
-        "Research",
-        "AGI"
-      ],
-      "popularity": 10,
-      "status": "Active",
-      "website": "https://openai.com",
-      "aiConfidence": 0.98,
       "events": [
         {
           "date": "2015-12-11",
-          "title": "OpenAI Founded",
-          "description": "OpenAI was founded in San Francisco by Sam Altman, Elon Musk, and others, with US$1 billion in pledges."
-        },
-        {
-          "date": "2018-06-11",
-          "title": "GPT-1 Released",
-          "description": "OpenAI published \"Improving Language Understanding by Generative Pre-Training\", introducing the original GPT model."
-        },
-        {
-          "date": "2019-03-11",
-          "title": "Transition to \"Capped-Profit\"",
-          "description": "OpenAI shifted from non-profit to a capped-for-profit structure."
+          "title": "OpenAI founded",
+          "description": "OpenAI was founded as an AI research organization in San Francisco."
         },
         {
           "date": "2022-11-30",
-          "title": "ChatGPT Launched",
-          "description": "ChatGPT was launched globally, gaining 1 million users in just 5 days."
+          "title": "ChatGPT launched",
+          "description": "ChatGPT introduced a mass-market conversational interface for large language models."
+        },
+        {
+          "date": "2024-05-13",
+          "title": "GPT-4o announced",
+          "description": "OpenAI introduced GPT-4o as an omni model for text, audio, and vision interaction."
         }
       ]
     },
@@ -52,560 +57,2279 @@
       "id": "chatgpt",
       "name": "ChatGPT",
       "type": "Product",
-      "subtitle": "Conversational AI System",
-      "description": "ChatGPT is a conversational model from OpenAI that is formulated to converse safely and effectively.",
-      "foundedAt": "2022-11-30",
+      "subtitle": "Conversational AI product",
+      "description": "ChatGPT is OpenAI’s assistant product for writing, coding, analysis, and multimodal interaction.",
       "tags": [
         "Chatbot",
-        "LLM",
-        "Productivity"
+        "Productivity",
+        "LLM"
       ],
       "popularity": 10,
       "status": "Active",
-      "website": "https://chat.openai.com"
+      "website": "https://openai.com/chatgpt/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openai.com",
+      "sourceList": [
+        "https://openai.com/chatgpt/"
+      ],
+      "relatedTechnology": [
+        "Chatbot",
+        "Productivity",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "ChatGPT is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2022-11-30"
     },
     {
       "id": "gpt4",
       "name": "GPT-4",
       "type": "Model",
-      "subtitle": "Multimodal Large Language Model",
-      "description": "GPT-4 is OpenAI’s most advanced system, producing safer and more useful responses.",
+      "subtitle": "Multimodal foundation model",
+      "description": "GPT-4 is a large multimodal model released by OpenAI and used across ChatGPT and API products.",
       "tags": [
-        "Multimodal",
         "LLM",
+        "Multimodal",
         "Foundation Model"
       ],
       "popularity": 10,
-      "status": "Active"
+      "status": "Active",
+      "website": "https://openai.com/research/gpt-4",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openai.com",
+      "sourceList": [
+        "https://openai.com/research/gpt-4"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Multimodal",
+        "Foundation Model"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "GPT-4 is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "gpt4o",
+      "name": "GPT-4o",
+      "type": "Model",
+      "subtitle": "Omni multimodal model",
+      "description": "GPT-4o is an OpenAI model designed for real-time multimodal text, vision, and audio interaction.",
+      "tags": [
+        "Multimodal",
+        "Realtime",
+        "Foundation Model"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://openai.com/index/hello-gpt-4o/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openai.com",
+      "sourceList": [
+        "https://openai.com/index/hello-gpt-4o/"
+      ],
+      "relatedTechnology": [
+        "Multimodal",
+        "Realtime",
+        "Foundation Model"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "GPT-4o is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "sora",
+      "name": "Sora",
+      "type": "Product",
+      "subtitle": "Text-to-video generation system",
+      "description": "Sora is OpenAI’s video generation system for creating realistic and imaginative scenes from prompts.",
+      "tags": [
+        "Video Generation",
+        "Diffusion",
+        "Multimodal"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://openai.com/sora/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openai.com",
+      "sourceList": [
+        "https://openai.com/sora/"
+      ],
+      "relatedTechnology": [
+        "Video Generation",
+        "Diffusion",
+        "Multimodal"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Sora is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "anthropic",
       "name": "Anthropic",
       "type": "Company",
-      "subtitle": "AI Safety & Research",
-      "description": "Anthropic is an AI safety and research company that builds reliable, interpretable, and steerable AI systems.",
-      "foundedAt": "2021-01-01",
-      "founders": [
-        "Dario Amodei",
-        "Daniela Amodei",
-        "Tom Brown",
-        "Chris Olah",
-        "Sam McCandlish",
-        "Jack Clark",
-        "Jared Kaplan"
-      ],
-      "country": "USA",
+      "subtitle": "AI safety and frontier model company",
+      "description": "Anthropic develops Claude models and emphasizes AI safety, interpretability, and constitutional AI.",
       "tags": [
         "LLM",
         "Safety",
-        "Research"
+        "Frontier Models"
       ],
       "popularity": 9,
       "status": "Active",
-      "website": "https://anthropic.com",
-      "aiConfidence": 0.95,
+      "website": "https://www.anthropic.com/company",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.anthropic.com",
+      "sourceList": [
+        "https://www.anthropic.com/company"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Safety",
+        "Frontier Models"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Anthropic is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2021-01-01",
+      "founders": [
+        "Dario Amodei",
+        "Daniela Amodei"
+      ],
+      "country": "USA",
       "events": [
         {
           "date": "2021-01-01",
-          "title": "Anthropic Founded",
-          "description": "Anthropic was founded by former OpenAI members, prioritizing AI safety and alignment research."
+          "title": "Anthropic founded",
+          "description": "Anthropic was founded by former OpenAI employees with a focus on AI safety."
         },
         {
           "date": "2023-03-14",
-          "title": "Claude Released",
-          "description": "Anthropic released its first AI assistant, Claude, emphasizing a constitutional AI approach."
-        },
-        {
-          "date": "2023-09-25",
-          "title": "Amazon Investment",
-          "description": "Amazon announced an investment of up to $4 billion in Anthropic."
+          "title": "Claude released",
+          "description": "Anthropic released Claude as an AI assistant product family."
         },
         {
           "date": "2024-03-04",
-          "title": "Claude 3 Family",
-          "description": "Anthropic introduced the Claude 3 model family (Haiku, Sonnet, Opus), achieving state-of-the-art benchmarks."
+          "title": "Claude 3 family",
+          "description": "Anthropic introduced the Claude 3 model family."
         }
       ]
-    },
-    {
-      "id": "claude3",
-      "name": "Claude 3",
-      "type": "Model",
-      "subtitle": "Next Generation AI Model Family",
-      "description": "Claude 3 is a family of foundation models by Anthropic (Opus, Sonnet, Haiku) offering strong performance and safety.",
-      "tags": [
-        "LLM",
-        "Foundation Model"
-      ],
-      "popularity": 9,
-      "status": "Active"
     },
     {
       "id": "claude",
       "name": "Claude",
       "type": "Product",
-      "subtitle": "AI Assistant by Anthropic",
-      "description": "Claude is a next-generation AI assistant built for work and designed to be safe, accurate, and secure.",
+      "subtitle": "AI assistant by Anthropic",
+      "description": "Claude is Anthropic’s assistant interface for writing, analysis, coding, and enterprise workflows.",
       "tags": [
         "Chatbot",
-        "Productivity"
+        "Productivity",
+        "Safety"
       ],
       "popularity": 9,
-      "status": "Active"
+      "status": "Active",
+      "website": "https://www.anthropic.com/claude",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.anthropic.com",
+      "sourceList": [
+        "https://www.anthropic.com/claude"
+      ],
+      "relatedTechnology": [
+        "Chatbot",
+        "Productivity",
+        "Safety"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Claude is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "claude3",
+      "name": "Claude 3",
+      "type": "Model",
+      "subtitle": "Anthropic model family",
+      "description": "Claude 3 is Anthropic’s model family including Haiku, Sonnet, and Opus variants.",
+      "tags": [
+        "LLM",
+        "Safety",
+        "Foundation Model"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://www.anthropic.com/news/claude-3-family",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.anthropic.com",
+      "sourceList": [
+        "https://www.anthropic.com/news/claude-3-family"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Safety",
+        "Foundation Model"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Claude 3 is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "claude35-sonnet",
+      "name": "Claude 3.5 Sonnet",
+      "type": "Model",
+      "subtitle": "High-performance Claude model",
+      "description": "Claude 3.5 Sonnet is an Anthropic model focused on stronger reasoning, coding, and agentic workflows.",
+      "tags": [
+        "LLM",
+        "Coding",
+        "Reasoning"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://www.anthropic.com/news/claude-3-5-sonnet",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.anthropic.com",
+      "sourceList": [
+        "https://www.anthropic.com/news/claude-3-5-sonnet"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Coding",
+        "Reasoning"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Claude 3.5 Sonnet is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "google",
       "name": "Google",
       "type": "Company",
-      "subtitle": "Search & Technology Giant",
-      "description": "Google is a multinational technology company focusing on search, cloud computing, computer software, quantum computing, e-commerce, and AI.",
-      "country": "USA",
+      "subtitle": "Global technology company",
+      "description": "Google is a major AI, cloud, search, and infrastructure company behind Transformer research and Gemini products.",
       "tags": [
         "Search",
         "Cloud",
-        "AI",
-        "Infra"
+        "AI"
       ],
       "popularity": 10,
       "status": "Active",
-      "aiConfidence": 0.99,
-      "events": [
-        {
-          "date": "1998-09-04",
-          "title": "Google Founded",
-          "description": "Google was founded by Larry Page and Sergey Brin."
-        },
-        {
-          "date": "2014-01-26",
-          "title": "DeepMind Acquisition",
-          "description": "Google acquired DeepMind Technologies for over $500 million."
-        },
-        {
-          "date": "2017-06-12",
-          "title": "Transformer Published",
-          "description": "Google Brain researchers published the \"Attention Is All You Need\" paper."
-        },
-        {
-          "date": "2023-12-06",
-          "title": "Gemini Announcement",
-          "description": "Google announced the Gemini multimodal AI models."
-        }
-      ]
+      "website": "https://about.google/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=about.google",
+      "sourceList": [
+        "https://about.google/"
+      ],
+      "relatedTechnology": [
+        "Search",
+        "Cloud",
+        "AI"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Google is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "1998-09-04",
+      "founders": [
+        "Larry Page",
+        "Sergey Brin"
+      ],
+      "country": "USA"
+    },
+    {
+      "id": "google-deepmind",
+      "name": "Google DeepMind",
+      "type": "Company",
+      "subtitle": "AI research lab",
+      "description": "Google DeepMind is Google’s AI research organization developing Gemini and foundational AI systems.",
+      "tags": [
+        "Research",
+        "Frontier Models",
+        "AI Safety"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://deepmind.google/about/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=deepmind.google",
+      "sourceList": [
+        "https://deepmind.google/about/"
+      ],
+      "relatedTechnology": [
+        "Research",
+        "Frontier Models",
+        "AI Safety"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Google DeepMind is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "UK, USA"
     },
     {
       "id": "gemini",
       "name": "Gemini",
       "type": "Model",
-      "subtitle": "Google’s Multimodal AI",
-      "description": "Gemini is the largest and most capable AI model from Google DeepMind, designed to be highly multimodal.",
+      "subtitle": "Google multimodal model family",
+      "description": "Gemini is Google DeepMind’s multimodal AI model family powering Google AI products.",
       "tags": [
+        "Multimodal",
+        "LLM",
+        "Foundation Model"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://deepmind.google/technologies/gemini/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=deepmind.google",
+      "sourceList": [
+        "https://deepmind.google/technologies/gemini/"
+      ],
+      "relatedTechnology": [
+        "Multimodal",
+        "LLM",
+        "Foundation Model"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Gemini is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "gemini-1-5",
+      "name": "Gemini 1.5",
+      "type": "Model",
+      "subtitle": "Long-context Gemini model",
+      "description": "Gemini 1.5 introduced long-context capabilities and improved multimodal reasoning in the Gemini family.",
+      "tags": [
+        "Long Context",
         "Multimodal",
         "LLM"
       ],
       "popularity": 9,
-      "status": "Active"
-    },
-    {
-      "id": "transformer",
-      "name": "Transformer",
-      "type": "Technology",
-      "subtitle": "Attention-based Neural Network Architecture",
-      "description": "The Transformer is a deep learning architecture based on attention mechanisms, introduced in \"Attention Is All You Need\".",
-      "foundedAt": "2017-06-12",
-      "tags": [
-        "Architecture",
-        "Deep Learning"
+      "status": "Active",
+      "website": "https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=blog.google",
+      "sourceList": [
+        "https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/"
       ],
-      "popularity": 10,
-      "status": "Active"
+      "relatedTechnology": [
+        "Long Context",
+        "Multimodal",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Gemini 1.5 is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "attention-is-all-you-need",
       "name": "Attention Is All You Need",
       "type": "Research",
-      "subtitle": "Seminal AI Paper",
-      "description": "The research paper published by Google researchers that introduced the Transformer architecture.",
+      "subtitle": "Transformer research paper",
+      "description": "The 2017 paper introduced the Transformer architecture that underpins modern large language models.",
       "tags": [
         "Paper",
-        "NLP"
+        "NLP",
+        "Transformer"
       ],
       "popularity": 10,
-      "status": "Active"
-    },
-    {
-      "id": "cursor",
-      "name": "Cursor",
-      "type": "Product",
-      "subtitle": "The AI Code Editor",
-      "description": "Cursor is an AI-powered code editor built to make you extraordinarily productive.",
-      "tags": [
-        "Code",
-        "IDE",
-        "DevTool"
-      ],
-      "popularity": 8,
       "status": "Active",
-      "website": "https://cursor.com"
+      "website": "https://arxiv.org/abs/1706.03762",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=arxiv.org",
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762"
+      ],
+      "relatedTechnology": [
+        "Paper",
+        "NLP",
+        "Transformer"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Attention Is All You Need is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2017-06-12"
     },
     {
-      "id": "github-copilot",
-      "name": "GitHub Copilot",
-      "type": "Product",
-      "subtitle": "Your AI Pair Programmer",
-      "description": "GitHub Copilot uses the OpenAI Codex to suggest code and entire functions in real-time.",
+      "id": "transformer",
+      "name": "Transformer",
+      "type": "Technology",
+      "subtitle": "Attention-based neural network architecture",
+      "description": "The Transformer architecture uses self-attention and became the foundation for modern LLMs.",
       "tags": [
-        "Code",
-        "Assistant",
-        "DevTool"
+        "Architecture",
+        "Deep Learning",
+        "Attention"
       ],
-      "popularity": 9,
-      "status": "Active"
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://arxiv.org/abs/1706.03762",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=arxiv.org",
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762"
+      ],
+      "relatedTechnology": [
+        "Architecture",
+        "Deep Learning",
+        "Attention"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Transformer is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2017-06-12"
     },
     {
       "id": "meta",
       "name": "Meta",
       "type": "Company",
-      "subtitle": "Social Technology Company",
-      "description": "Meta builds technologies that help people connect, find communities, and grow businesses, and is a major player in open-source AI.",
-      "country": "USA",
+      "subtitle": "Social technology and AI company",
+      "description": "Meta develops open AI models and infrastructure including Llama and PyTorch.",
       "tags": [
-        "Social",
-        "VR",
+        "Open Source",
         "AI",
-        "Open Source"
+        "Social"
       ],
       "popularity": 10,
-      "status": "Active"
+      "status": "Active",
+      "website": "https://ai.meta.com/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=ai.meta.com",
+      "sourceList": [
+        "https://ai.meta.com/"
+      ],
+      "relatedTechnology": [
+        "Open Source",
+        "AI",
+        "Social"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Meta is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "llama",
+      "name": "Llama",
+      "type": "Open Source",
+      "subtitle": "Open foundation model family",
+      "description": "Llama is Meta’s family of open foundation models for research and production use.",
+      "tags": [
+        "Open Weights",
+        "LLM",
+        "Foundation Model"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://ai.meta.com/llama/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=ai.meta.com",
+      "sourceList": [
+        "https://ai.meta.com/llama/"
+      ],
+      "relatedTechnology": [
+        "Open Weights",
+        "LLM",
+        "Foundation Model"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Llama is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "llama3",
       "name": "Llama 3",
       "type": "Open Source",
-      "subtitle": "Open Foundation Model",
-      "description": "Meta Llama 3 is a widely used open-weights large language model optimized for dialogue and general capabilities.",
+      "subtitle": "Meta open model generation",
+      "description": "Llama 3 is Meta’s open model generation with strong multilingual and reasoning capabilities.",
       "tags": [
-        "LLM",
-        "Open Weights"
+        "Open Weights",
+        "LLM"
       ],
       "popularity": 9,
-      "status": "Active"
-    },
-    {
-      "id": "huggingface",
-      "name": "Hugging Face",
-      "type": "Company",
-      "subtitle": "The AI community building the future",
-      "description": "Hugging Face is an open-source data science and machine learning platform that acts as a hub for AI models and datasets.",
-      "foundedAt": "2016-01-01",
-      "country": "USA",
-      "tags": [
-        "Platform",
-        "Open Source",
-        "Community"
+      "status": "Active",
+      "website": "https://ai.meta.com/blog/meta-llama-3/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=ai.meta.com",
+      "sourceList": [
+        "https://ai.meta.com/blog/meta-llama-3/"
       ],
-      "popularity": 9,
-      "status": "Active"
+      "relatedTechnology": [
+        "Open Weights",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Llama 3 is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "pytorch",
       "name": "PyTorch",
       "type": "Open Source",
-      "subtitle": "Deep Learning Framework",
-      "description": "An open source machine learning framework that accelerates the path from research prototyping to production deployment.",
+      "subtitle": "Deep learning framework",
+      "description": "PyTorch is an open source machine learning framework widely used for AI research and production.",
       "tags": [
         "Framework",
-        "ML"
+        "Deep Learning",
+        "Training"
       ],
       "popularity": 10,
-      "status": "Active"
-    },
-    {
-      "id": "ilya-sutskever",
-      "name": "Ilya Sutskever",
-      "type": "Person",
-      "subtitle": "AI Researcher & Co-founder",
-      "description": "Ilya Sutskever is an influential AI researcher, co-founder of OpenAI, and key contributor to many deep learning breakthroughs.",
-      "tags": [
-        "Researcher",
-        "Founder"
+      "status": "Active",
+      "website": "https://pytorch.org/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=pytorch.org",
+      "sourceList": [
+        "https://pytorch.org/"
       ],
-      "popularity": 8,
-      "status": "Active"
-    },
-    {
-      "id": "sam-altman",
-      "name": "Sam Altman",
-      "type": "Person",
-      "subtitle": "CEO of OpenAI",
-      "description": "Entrepreneur and investor, known as the CEO of OpenAI.",
-      "tags": [
-        "Executive",
-        "Investor"
+      "relatedTechnology": [
+        "Framework",
+        "Deep Learning",
+        "Training"
       ],
-      "popularity": 10,
-      "status": "Active"
+      "aiConfidence": 0.9,
+      "aiSummary": "PyTorch is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
-      "id": "dario-amodei",
-      "name": "Dario Amodei",
-      "type": "Person",
-      "subtitle": "CEO of Anthropic",
-      "description": "Co-founder and CEO of Anthropic, former VP of Research at OpenAI.",
-      "tags": [
-        "Executive",
-        "Researcher"
-      ],
-      "popularity": 7,
-      "status": "Active"
-    },
-    {
-      "id": "xai",
-      "name": "xAI",
+      "id": "huggingface",
+      "name": "Hugging Face",
       "type": "Company",
-      "subtitle": "Understand the Universe",
-      "description": "xAI is an artificial intelligence company founded by Elon Musk, aiming to understand the true nature of the universe.",
-      "foundedAt": "2023-07-12",
-      "founders": [
-        "Elon Musk"
-      ],
-      "country": "USA",
+      "subtitle": "AI community and model hub",
+      "description": "Hugging Face hosts models, datasets, Spaces, and open source tools for machine learning workflows.",
       "tags": [
-        "LLM",
-        "Research"
+        "Model Hub",
+        "Open Source",
+        "Community"
       ],
-      "popularity": 8,
-      "status": "Active"
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://huggingface.co/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=huggingface.co",
+      "sourceList": [
+        "https://huggingface.co/"
+      ],
+      "relatedTechnology": [
+        "Model Hub",
+        "Open Source",
+        "Community"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Hugging Face is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2016-01-01",
+      "country": "USA, France"
     },
     {
-      "id": "grok",
-      "name": "Grok",
-      "type": "Product",
-      "subtitle": "AI Assistant by xAI",
-      "description": "Grok is an AI modeled after the Hitchhiker's Guide to the Galaxy, intended to answer almost anything with a bit of wit.",
+      "id": "transformers-library",
+      "name": "Transformers Library",
+      "type": "Open Source",
+      "subtitle": "Hugging Face model library",
+      "description": "The Transformers library provides APIs and pretrained model integrations for NLP, vision, audio, and multimodal models.",
       "tags": [
-        "Chatbot",
-        "LLM"
+        "Library",
+        "Model Hub",
+        "Open Source"
       ],
-      "popularity": 7,
-      "status": "Active"
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://github.com/huggingface/transformers",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=github.com",
+      "sourceList": [
+        "https://github.com/huggingface/transformers"
+      ],
+      "relatedTechnology": [
+        "Library",
+        "Model Hub",
+        "Open Source"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Transformers Library is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "github": "https://github.com/huggingface/transformers"
+    },
+    {
+      "id": "diffusion-models",
+      "name": "Diffusion Models",
+      "type": "Technology",
+      "subtitle": "Generative modeling approach",
+      "description": "Diffusion models generate data by learning to reverse a gradual noise process and are central to image and video generation.",
+      "tags": [
+        "Generative AI",
+        "Image Generation",
+        "Math"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://arxiv.org/abs/2006.11239",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=arxiv.org",
+      "sourceList": [
+        "https://arxiv.org/abs/2006.11239"
+      ],
+      "relatedTechnology": [
+        "Generative AI",
+        "Image Generation",
+        "Math"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Diffusion Models is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2020-06-19"
+    },
+    {
+      "id": "stability-ai",
+      "name": "Stability AI",
+      "type": "Company",
+      "subtitle": "Generative AI company",
+      "description": "Stability AI develops open generative media models and products including Stable Diffusion-related systems.",
+      "tags": [
+        "Image Generation",
+        "Open Models",
+        "Generative AI"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://stability.ai/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=stability.ai",
+      "sourceList": [
+        "https://stability.ai/"
+      ],
+      "relatedTechnology": [
+        "Image Generation",
+        "Open Models",
+        "Generative AI"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Stability AI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "UK"
+    },
+    {
+      "id": "stable-diffusion",
+      "name": "Stable Diffusion",
+      "type": "Model",
+      "subtitle": "Text-to-image model family",
+      "description": "Stable Diffusion is a widely used latent diffusion model family for image generation.",
+      "tags": [
+        "Image Generation",
+        "Diffusion",
+        "Open Weights"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://stability.ai/stable-image",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=stability.ai",
+      "sourceList": [
+        "https://stability.ai/stable-image"
+      ],
+      "relatedTechnology": [
+        "Image Generation",
+        "Diffusion",
+        "Open Weights"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Stable Diffusion is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     },
     {
       "id": "midjourney",
       "name": "Midjourney",
       "type": "Company",
-      "subtitle": "Independent Research Lab",
-      "description": "Midjourney is an independent research lab exploring new mediums of thought and expanding the imaginative powers of the human species.",
-      "country": "USA",
+      "subtitle": "Independent AI image generation lab",
+      "description": "Midjourney builds a popular image generation service focused on creative visual synthesis.",
       "tags": [
         "Image Generation",
-        "Research"
+        "Creative Tools"
       ],
       "popularity": 9,
-      "status": "Active"
+      "status": "Active",
+      "website": "https://www.midjourney.com/home",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.midjourney.com",
+      "sourceList": [
+        "https://www.midjourney.com/home"
+      ],
+      "relatedTechnology": [
+        "Image Generation",
+        "Creative Tools"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Midjourney is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
     },
     {
-      "id": "diffusion",
-      "name": "Diffusion Models",
-      "type": "Technology",
-      "subtitle": "Generative Models",
-      "description": "Diffusion models are a class of latent variable models applied in image generation, audio synthesis, and more.",
+      "id": "mistral-ai",
+      "name": "Mistral AI",
+      "type": "Company",
+      "subtitle": "European frontier AI company",
+      "description": "Mistral AI develops open and commercial language models for developers and enterprises.",
       "tags": [
-        "Generative AI",
-        "Math"
+        "LLM",
+        "Open Models",
+        "Europe"
       ],
       "popularity": 9,
-      "status": "Active"
+      "status": "Active",
+      "website": "https://mistral.ai/company/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=mistral.ai",
+      "sourceList": [
+        "https://mistral.ai/company/"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Open Models",
+        "Europe"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Mistral AI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2023-04-01",
+      "country": "France"
+    },
+    {
+      "id": "mixtral",
+      "name": "Mixtral",
+      "type": "Model",
+      "subtitle": "Sparse mixture-of-experts model",
+      "description": "Mixtral is Mistral AI’s sparse mixture-of-experts model line focused on efficient open model performance.",
+      "tags": [
+        "MoE",
+        "Open Weights",
+        "LLM"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://mistral.ai/news/mixtral-of-experts/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=mistral.ai",
+      "sourceList": [
+        "https://mistral.ai/news/mixtral-of-experts/"
+      ],
+      "relatedTechnology": [
+        "MoE",
+        "Open Weights",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Mixtral is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "mistral-large",
+      "name": "Mistral Large",
+      "type": "Model",
+      "subtitle": "Mistral frontier model",
+      "description": "Mistral Large is a commercial frontier model from Mistral AI for complex multilingual reasoning tasks.",
+      "tags": [
+        "LLM",
+        "Reasoning",
+        "Multilingual"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://mistral.ai/news/mistral-large/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=mistral.ai",
+      "sourceList": [
+        "https://mistral.ai/news/mistral-large/"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Reasoning",
+        "Multilingual"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Mistral Large is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "cohere",
+      "name": "Cohere",
+      "type": "Company",
+      "subtitle": "Enterprise AI platform company",
+      "description": "Cohere builds language models and retrieval products for enterprise AI applications.",
+      "tags": [
+        "Enterprise AI",
+        "RAG",
+        "LLM"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://cohere.com/about",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=cohere.com",
+      "sourceList": [
+        "https://cohere.com/about"
+      ],
+      "relatedTechnology": [
+        "Enterprise AI",
+        "RAG",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Cohere is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "Canada"
+    },
+    {
+      "id": "command-r",
+      "name": "Command R",
+      "type": "Model",
+      "subtitle": "Retrieval-augmented model family",
+      "description": "Command R is Cohere’s model family optimized for retrieval-augmented generation and enterprise workflows.",
+      "tags": [
+        "RAG",
+        "Enterprise AI",
+        "LLM"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://cohere.com/blog/command-r",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=cohere.com",
+      "sourceList": [
+        "https://cohere.com/blog/command-r"
+      ],
+      "relatedTechnology": [
+        "RAG",
+        "Enterprise AI",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Command R is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "xai",
+      "name": "xAI",
+      "type": "Company",
+      "subtitle": "AI company founded by Elon Musk",
+      "description": "xAI develops Grok and AI systems integrated with the X ecosystem.",
+      "tags": [
+        "LLM",
+        "Chatbot",
+        "Research"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://x.ai/company",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=x.ai",
+      "sourceList": [
+        "https://x.ai/company"
+      ],
+      "relatedTechnology": [
+        "LLM",
+        "Chatbot",
+        "Research"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "xAI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "foundedAt": "2023-07-12",
+      "founders": [
+        "Elon Musk"
+      ],
+      "country": "USA"
+    },
+    {
+      "id": "grok",
+      "name": "Grok",
+      "type": "Product",
+      "subtitle": "AI assistant by xAI",
+      "description": "Grok is xAI’s conversational assistant product.",
+      "tags": [
+        "Chatbot",
+        "LLM"
+      ],
+      "popularity": 7,
+      "status": "Active",
+      "website": "https://x.ai/grok",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=x.ai",
+      "sourceList": [
+        "https://x.ai/grok"
+      ],
+      "relatedTechnology": [
+        "Chatbot",
+        "LLM"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Grok is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "type": "Product",
+      "subtitle": "AI answer engine",
+      "description": "Perplexity is an AI answer engine that combines search, citations, and conversational exploration.",
+      "tags": [
+        "Search",
+        "Answer Engine",
+        "RAG"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.perplexity.ai/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.perplexity.ai",
+      "sourceList": [
+        "https://www.perplexity.ai/"
+      ],
+      "relatedTechnology": [
+        "Search",
+        "Answer Engine",
+        "RAG"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Perplexity is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "notion-ai",
+      "name": "Notion AI",
+      "type": "Product",
+      "subtitle": "AI writing and workspace assistant",
+      "description": "Notion AI brings writing, summarization, and automation features into the Notion workspace.",
+      "tags": [
+        "Productivity",
+        "Writing",
+        "Workspace"
+      ],
+      "popularity": 7,
+      "status": "Active",
+      "website": "https://www.notion.so/product/ai",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.notion.so",
+      "sourceList": [
+        "https://www.notion.so/product/ai"
+      ],
+      "relatedTechnology": [
+        "Productivity",
+        "Writing",
+        "Workspace"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Notion AI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "type": "Product",
+      "subtitle": "AI code editor",
+      "description": "Cursor is an AI-powered code editor built for pair programming and software development workflows.",
+      "tags": [
+        "Code",
+        "IDE",
+        "Agents"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://www.cursor.com/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.cursor.com",
+      "sourceList": [
+        "https://www.cursor.com/"
+      ],
+      "relatedTechnology": [
+        "Code",
+        "IDE",
+        "Agents"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Cursor is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "type": "Company",
+      "subtitle": "Developer platform",
+      "description": "GitHub hosts software repositories and AI developer tools including GitHub Copilot.",
+      "tags": [
+        "Developer Platform",
+        "Open Source",
+        "Code"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://github.com/about",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=github.com",
+      "sourceList": [
+        "https://github.com/about"
+      ],
+      "relatedTechnology": [
+        "Developer Platform",
+        "Open Source",
+        "Code"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "GitHub is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "type": "Product",
+      "subtitle": "AI pair programmer",
+      "description": "GitHub Copilot provides AI code completion, chat, and developer assistance inside coding tools.",
+      "tags": [
+        "Code",
+        "Assistant",
+        "Developer Tools"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://github.com/features/copilot",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=github.com",
+      "sourceList": [
+        "https://github.com/features/copilot"
+      ],
+      "relatedTechnology": [
+        "Code",
+        "Assistant",
+        "Developer Tools"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "GitHub Copilot is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "type": "Company",
+      "subtitle": "Cloud and AI platform company",
+      "description": "Microsoft provides Azure AI services, GitHub, Copilot products, and enterprise AI infrastructure.",
+      "tags": [
+        "Cloud",
+        "Enterprise AI",
+        "Developer Tools"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://www.microsoft.com/ai",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.microsoft.com",
+      "sourceList": [
+        "https://www.microsoft.com/ai"
+      ],
+      "relatedTechnology": [
+        "Cloud",
+        "Enterprise AI",
+        "Developer Tools"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Microsoft is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "azure-openai-service",
+      "name": "Azure OpenAI Service",
+      "type": "Product",
+      "subtitle": "Enterprise OpenAI deployment platform",
+      "description": "Azure OpenAI Service provides access to OpenAI models through Microsoft Azure for enterprise applications.",
+      "tags": [
+        "Cloud",
+        "Enterprise AI",
+        "API"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://azure.microsoft.com/products/ai-services/openai-service",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=azure.microsoft.com",
+      "sourceList": [
+        "https://azure.microsoft.com/products/ai-services/openai-service"
+      ],
+      "relatedTechnology": [
+        "Cloud",
+        "Enterprise AI",
+        "API"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Azure OpenAI Service is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA",
+      "type": "Company",
+      "subtitle": "AI compute and accelerator company",
+      "description": "NVIDIA provides GPUs, CUDA, TensorRT, and AI infrastructure used across model training and inference.",
+      "tags": [
+        "GPU",
+        "Inference",
+        "Training"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://www.nvidia.com/en-us/ai-data-science/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.nvidia.com",
+      "sourceList": [
+        "https://www.nvidia.com/en-us/ai-data-science/"
+      ],
+      "relatedTechnology": [
+        "GPU",
+        "Inference",
+        "Training"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "NVIDIA is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "cuda",
+      "name": "CUDA",
+      "type": "Technology",
+      "subtitle": "NVIDIA parallel computing platform",
+      "description": "CUDA is NVIDIA’s platform and programming model for GPU-accelerated computing.",
+      "tags": [
+        "GPU",
+        "Compute",
+        "Training"
+      ],
+      "popularity": 10,
+      "status": "Active",
+      "website": "https://developer.nvidia.com/cuda-zone",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=developer.nvidia.com",
+      "sourceList": [
+        "https://developer.nvidia.com/cuda-zone"
+      ],
+      "relatedTechnology": [
+        "GPU",
+        "Compute",
+        "Training"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "CUDA is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "tensorrt",
+      "name": "TensorRT",
+      "type": "Technology",
+      "subtitle": "NVIDIA inference optimization stack",
+      "description": "TensorRT optimizes neural network inference for NVIDIA GPUs.",
+      "tags": [
+        "Inference",
+        "Optimization",
+        "GPU"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://developer.nvidia.com/tensorrt",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=developer.nvidia.com",
+      "sourceList": [
+        "https://developer.nvidia.com/tensorrt"
+      ],
+      "relatedTechnology": [
+        "Inference",
+        "Optimization",
+        "GPU"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "TensorRT is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "langchain",
+      "name": "LangChain",
+      "type": "Open Source",
+      "subtitle": "LLM application framework",
+      "description": "LangChain is a framework for building LLM applications with chains, tools, agents, and retrieval integrations.",
+      "tags": [
+        "Agents",
+        "RAG",
+        "Framework"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://www.langchain.com/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.langchain.com",
+      "sourceList": [
+        "https://www.langchain.com/"
+      ],
+      "relatedTechnology": [
+        "Agents",
+        "RAG",
+        "Framework"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "LangChain is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "github": "https://github.com/langchain-ai/langchain"
+    },
+    {
+      "id": "llamaindex",
+      "name": "LlamaIndex",
+      "type": "Open Source",
+      "subtitle": "Data framework for LLM apps",
+      "description": "LlamaIndex connects private and public data to LLM applications through indexes, retrieval, and orchestration.",
+      "tags": [
+        "RAG",
+        "Data Framework",
+        "Agents"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.llamaindex.ai/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.llamaindex.ai",
+      "sourceList": [
+        "https://www.llamaindex.ai/"
+      ],
+      "relatedTechnology": [
+        "RAG",
+        "Data Framework",
+        "Agents"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "LlamaIndex is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "github": "https://github.com/run-llama/llama_index"
+    },
+    {
+      "id": "vector-database",
+      "name": "Vector Database",
+      "type": "Technology",
+      "subtitle": "Embedding search storage layer",
+      "description": "Vector databases store embeddings and enable semantic retrieval for RAG and recommendation systems.",
+      "tags": [
+        "RAG",
+        "Embeddings",
+        "Search"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://www.pinecone.io/learn/vector-database/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.pinecone.io",
+      "sourceList": [
+        "https://www.pinecone.io/learn/vector-database/"
+      ],
+      "relatedTechnology": [
+        "RAG",
+        "Embeddings",
+        "Search"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Vector Database is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "pinecone",
+      "name": "Pinecone",
+      "type": "Product",
+      "subtitle": "Managed vector database",
+      "description": "Pinecone is a managed vector database platform for semantic search and RAG applications.",
+      "tags": [
+        "Vector Database",
+        "RAG",
+        "Search"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.pinecone.io/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.pinecone.io",
+      "sourceList": [
+        "https://www.pinecone.io/"
+      ],
+      "relatedTechnology": [
+        "Vector Database",
+        "RAG",
+        "Search"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Pinecone is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "weaviate",
+      "name": "Weaviate",
+      "type": "Open Source",
+      "subtitle": "Open source vector database",
+      "description": "Weaviate is an open source vector database for AI-native applications.",
+      "tags": [
+        "Vector Database",
+        "Open Source",
+        "RAG"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://weaviate.io/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=weaviate.io",
+      "sourceList": [
+        "https://weaviate.io/"
+      ],
+      "relatedTechnology": [
+        "Vector Database",
+        "Open Source",
+        "RAG"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Weaviate is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "qdrant",
+      "name": "Qdrant",
+      "type": "Open Source",
+      "subtitle": "Open source vector search engine",
+      "description": "Qdrant is an open source vector database and similarity search engine.",
+      "tags": [
+        "Vector Database",
+        "Open Source",
+        "Search"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://qdrant.tech/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=qdrant.tech",
+      "sourceList": [
+        "https://qdrant.tech/"
+      ],
+      "relatedTechnology": [
+        "Vector Database",
+        "Open Source",
+        "Search"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Qdrant is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "kubernetes",
+      "name": "Kubernetes",
+      "type": "Open Source",
+      "subtitle": "Container orchestration platform",
+      "description": "Kubernetes is an open source platform for deploying and managing containerized applications.",
+      "tags": [
+        "Infrastructure",
+        "Orchestration",
+        "Cloud"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://kubernetes.io/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=kubernetes.io",
+      "sourceList": [
+        "https://kubernetes.io/"
+      ],
+      "relatedTechnology": [
+        "Infrastructure",
+        "Orchestration",
+        "Cloud"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Kubernetes is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "ray",
+      "name": "Ray",
+      "type": "Open Source",
+      "subtitle": "Distributed AI compute framework",
+      "description": "Ray is a distributed computing framework used for scalable AI workloads and model serving pipelines.",
+      "tags": [
+        "Distributed Computing",
+        "Training",
+        "Serving"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.ray.io/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.ray.io",
+      "sourceList": [
+        "https://www.ray.io/"
+      ],
+      "relatedTechnology": [
+        "Distributed Computing",
+        "Training",
+        "Serving"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Ray is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "type": "Open Source",
+      "subtitle": "High-throughput LLM inference engine",
+      "description": "vLLM is an open source inference and serving engine for large language models.",
+      "tags": [
+        "Inference",
+        "Serving",
+        "Open Source"
+      ],
+      "popularity": 9,
+      "status": "Active",
+      "website": "https://github.com/vllm-project/vllm",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=github.com",
+      "sourceList": [
+        "https://github.com/vllm-project/vllm"
+      ],
+      "relatedTechnology": [
+        "Inference",
+        "Serving",
+        "Open Source"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "vLLM is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "github": "https://github.com/vllm-project/vllm"
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "type": "Open Source",
+      "subtitle": "Local model runtime",
+      "description": "Ollama lets users run and manage open models locally on personal machines and servers.",
+      "tags": [
+        "Local AI",
+        "Open Models",
+        "Runtime"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://ollama.com/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=ollama.com",
+      "sourceList": [
+        "https://ollama.com/"
+      ],
+      "relatedTechnology": [
+        "Local AI",
+        "Open Models",
+        "Runtime"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Ollama is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "gradio",
+      "name": "Gradio",
+      "type": "Open Source",
+      "subtitle": "ML app interface framework",
+      "description": "Gradio is an open source Python library for quickly building machine learning demos and apps.",
+      "tags": [
+        "Demo",
+        "UI",
+        "Open Source"
+      ],
+      "popularity": 7,
+      "status": "Active",
+      "website": "https://www.gradio.app/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.gradio.app",
+      "sourceList": [
+        "https://www.gradio.app/"
+      ],
+      "relatedTechnology": [
+        "Demo",
+        "UI",
+        "Open Source"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Gradio is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "streamlit",
+      "name": "Streamlit",
+      "type": "Open Source",
+      "subtitle": "Python app framework for data and AI",
+      "description": "Streamlit is an open source app framework for building data and AI applications in Python.",
+      "tags": [
+        "App Framework",
+        "Data Apps",
+        "Open Source"
+      ],
+      "popularity": 7,
+      "status": "Active",
+      "website": "https://streamlit.io/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=streamlit.io",
+      "sourceList": [
+        "https://streamlit.io/"
+      ],
+      "relatedTechnology": [
+        "App Framework",
+        "Data Apps",
+        "Open Source"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Streamlit is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "type": "Product",
+      "subtitle": "Unified model routing API",
+      "description": "OpenRouter provides a unified API for accessing and comparing AI models from multiple providers.",
+      "tags": [
+        "Model Router",
+        "API",
+        "Developer Tools"
+      ],
+      "popularity": 7,
+      "status": "Active",
+      "website": "https://openrouter.ai/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=openrouter.ai",
+      "sourceList": [
+        "https://openrouter.ai/"
+      ],
+      "relatedTechnology": [
+        "Model Router",
+        "API",
+        "Developer Tools"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "OpenRouter is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "together-ai",
+      "name": "Together AI",
+      "type": "Company",
+      "subtitle": "AI cloud and open model platform",
+      "description": "Together AI provides infrastructure and APIs for training, fine-tuning, and serving open models.",
+      "tags": [
+        "AI Cloud",
+        "Open Models",
+        "Inference"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.together.ai/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=www.together.ai",
+      "sourceList": [
+        "https://www.together.ai/"
+      ],
+      "relatedTechnology": [
+        "AI Cloud",
+        "Open Models",
+        "Inference"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Together AI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "scale-ai",
+      "name": "Scale AI",
+      "type": "Company",
+      "subtitle": "Data platform for AI",
+      "description": "Scale AI provides data, evaluation, and annotation infrastructure for AI systems.",
+      "tags": [
+        "Data",
+        "Evaluation",
+        "RLHF"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://scale.com/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=scale.com",
+      "sourceList": [
+        "https://scale.com/"
+      ],
+      "relatedTechnology": [
+        "Data",
+        "Evaluation",
+        "RLHF"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "Scale AI is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships.",
+      "country": "USA"
+    },
+    {
+      "id": "arxiv",
+      "name": "arXiv",
+      "type": "Research",
+      "subtitle": "Open research preprint repository",
+      "description": "arXiv hosts open research preprints used heavily across machine learning and AI research.",
+      "tags": [
+        "Research",
+        "Papers",
+        "Open Access"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://arxiv.org/",
+      "logo": "https://www.google.com/s2/favicons?sz=64&domain=arxiv.org",
+      "sourceList": [
+        "https://arxiv.org/"
+      ],
+      "relatedTechnology": [
+        "Research",
+        "Papers",
+        "Open Access"
+      ],
+      "aiConfidence": 0.9,
+      "aiSummary": "arXiv is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
     }
   ],
   "edges": [
     {
-      "id": "e1",
+      "id": "e-openai-gpt4",
       "sourceId": "openai",
       "targetId": "gpt4",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://openai.com/research/gpt-4"
+      ]
     },
     {
-      "id": "e2",
+      "id": "e-openai-gpt4o",
+      "sourceId": "openai",
+      "targetId": "gpt4o",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://openai.com/index/hello-gpt-4o/"
+      ]
+    },
+    {
+      "id": "e-openai-chatgpt",
       "sourceId": "openai",
       "targetId": "chatgpt",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://openai.com/chatgpt/"
+      ]
     },
     {
-      "id": "e3",
+      "id": "e-gpt4-chatgpt",
       "sourceId": "gpt4",
       "targetId": "chatgpt",
       "relationType": "powered_by",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/research/gpt-4",
+        "https://openai.com/chatgpt/"
+      ]
     },
     {
-      "id": "e4",
-      "sourceId": "sam-altman",
-      "targetId": "openai",
-      "relationType": "founded_by",
-      "weight": 1
+      "id": "e-gpt4o-chatgpt",
+      "sourceId": "gpt4o",
+      "targetId": "chatgpt",
+      "relationType": "powered_by",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/index/hello-gpt-4o/",
+        "https://openai.com/chatgpt/"
+      ]
     },
     {
-      "id": "e5",
-      "sourceId": "ilya-sutskever",
-      "targetId": "openai",
-      "relationType": "founded_by",
-      "weight": 1
+      "id": "e-openai-sora",
+      "sourceId": "openai",
+      "targetId": "sora",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://openai.com/sora/"
+      ]
     },
     {
-      "id": "e6",
-      "sourceId": "dario-amodei",
-      "targetId": "anthropic",
-      "relationType": "founded_by",
-      "weight": 1
-    },
-    {
-      "id": "e7",
+      "id": "e-anthropic-claude3",
       "sourceId": "anthropic",
       "targetId": "claude3",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.anthropic.com/company",
+        "https://www.anthropic.com/news/claude-3-family"
+      ]
     },
     {
-      "id": "e8",
+      "id": "e-anthropic-claude35",
       "sourceId": "anthropic",
-      "targetId": "claude",
+      "targetId": "claude35-sonnet",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.anthropic.com/company",
+        "https://www.anthropic.com/news/claude-3-5-sonnet"
+      ]
     },
     {
-      "id": "e9",
-      "sourceId": "claude3",
+      "id": "e-claude35-claude",
+      "sourceId": "claude35-sonnet",
       "targetId": "claude",
       "relationType": "powered_by",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.anthropic.com/news/claude-3-5-sonnet",
+        "https://www.anthropic.com/claude"
+      ]
     },
     {
-      "id": "e10",
-      "sourceId": "openai",
-      "targetId": "anthropic",
-      "relationType": "competes_with",
-      "weight": 1
-    },
-    {
-      "id": "e11",
-      "sourceId": "chatgpt",
-      "targetId": "claude",
-      "relationType": "competes_with",
-      "weight": 1
-    },
-    {
-      "id": "e12",
+      "id": "e-google-deepmind",
       "sourceId": "google",
+      "targetId": "google-deepmind",
+      "relationType": "acquired",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://about.google/",
+        "https://deepmind.google/about/"
+      ]
+    },
+    {
+      "id": "e-deepmind-gemini",
+      "sourceId": "google-deepmind",
       "targetId": "gemini",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://deepmind.google/about/",
+        "https://deepmind.google/technologies/gemini/"
+      ]
     },
     {
-      "id": "e13",
-      "sourceId": "google",
-      "targetId": "openai",
-      "relationType": "competes_with",
-      "weight": 1
+      "id": "e-gemini15-gemini",
+      "sourceId": "gemini-1-5",
+      "targetId": "gemini",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/",
+        "https://deepmind.google/technologies/gemini/"
+      ]
     },
     {
-      "id": "e14",
-      "sourceId": "google",
-      "targetId": "attention-is-all-you-need",
-      "relationType": "built_on",
-      "weight": 1
-    },
-    {
-      "id": "e15",
+      "id": "e-paper-transformer",
       "sourceId": "attention-is-all-you-need",
       "targetId": "transformer",
       "relationType": "related_to",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/1706.03762"
+      ]
     },
     {
-      "id": "e16",
+      "id": "e-transformer-gpt4",
       "sourceId": "transformer",
       "targetId": "gpt4",
       "relationType": "uses",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://openai.com/research/gpt-4"
+      ]
     },
     {
-      "id": "e17",
+      "id": "e-transformer-claude3",
       "sourceId": "transformer",
       "targetId": "claude3",
       "relationType": "uses",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://www.anthropic.com/news/claude-3-family"
+      ]
     },
     {
-      "id": "e18",
+      "id": "e-transformer-gemini",
       "sourceId": "transformer",
       "targetId": "gemini",
       "relationType": "uses",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://deepmind.google/technologies/gemini/"
+      ]
     },
     {
-      "id": "e19",
+      "id": "e-meta-llama",
       "sourceId": "meta",
-      "targetId": "llama3",
+      "targetId": "llama",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://ai.meta.com/",
+        "https://ai.meta.com/llama/"
+      ]
     },
     {
-      "id": "e20",
+      "id": "e-llama-llama3",
+      "sourceId": "llama",
+      "targetId": "llama3",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://ai.meta.com/llama/",
+        "https://ai.meta.com/blog/meta-llama-3/"
+      ]
+    },
+    {
+      "id": "e-meta-pytorch",
       "sourceId": "meta",
       "targetId": "pytorch",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://ai.meta.com/",
+        "https://pytorch.org/"
+      ]
     },
     {
-      "id": "e21",
-      "sourceId": "gpt4",
-      "targetId": "github-copilot",
-      "relationType": "powered_by",
-      "weight": 1
-    },
-    {
-      "id": "e22",
-      "sourceId": "claude3",
-      "targetId": "cursor",
-      "relationType": "powered_by",
-      "weight": 1
-    },
-    {
-      "id": "e23",
-      "sourceId": "cursor",
-      "targetId": "github-copilot",
-      "relationType": "competes_with",
-      "weight": 1
-    },
-    {
-      "id": "e24",
+      "id": "e-hf-transformers",
       "sourceId": "huggingface",
-      "targetId": "llama3",
-      "relationType": "related_to",
-      "weight": 1
+      "targetId": "transformers-library",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://huggingface.co/",
+        "https://github.com/huggingface/transformers"
+      ]
     },
     {
-      "id": "e25",
+      "id": "e-transformers-llama",
+      "sourceId": "transformers-library",
+      "targetId": "llama",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://github.com/huggingface/transformers",
+        "https://ai.meta.com/llama/"
+      ]
+    },
+    {
+      "id": "e-diffusion-stablediffusion",
+      "sourceId": "diffusion-models",
+      "targetId": "stable-diffusion",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/2006.11239",
+        "https://stability.ai/stable-image"
+      ]
+    },
+    {
+      "id": "e-stability-stablediffusion",
+      "sourceId": "stability-ai",
+      "targetId": "stable-diffusion",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://stability.ai/",
+        "https://stability.ai/stable-image"
+      ]
+    },
+    {
+      "id": "e-diffusion-midjourney",
+      "sourceId": "diffusion-models",
+      "targetId": "midjourney",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/2006.11239",
+        "https://www.midjourney.com/home"
+      ]
+    },
+    {
+      "id": "e-diffusion-sora",
+      "sourceId": "diffusion-models",
+      "targetId": "sora",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/abs/2006.11239",
+        "https://openai.com/sora/"
+      ]
+    },
+    {
+      "id": "e-mistral-mixtral",
+      "sourceId": "mistral-ai",
+      "targetId": "mixtral",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://mistral.ai/company/",
+        "https://mistral.ai/news/mixtral-of-experts/"
+      ]
+    },
+    {
+      "id": "e-mistral-large",
+      "sourceId": "mistral-ai",
+      "targetId": "mistral-large",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://mistral.ai/company/",
+        "https://mistral.ai/news/mistral-large/"
+      ]
+    },
+    {
+      "id": "e-cohere-commandr",
+      "sourceId": "cohere",
+      "targetId": "command-r",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://cohere.com/about",
+        "https://cohere.com/blog/command-r"
+      ]
+    },
+    {
+      "id": "e-xai-grok",
       "sourceId": "xai",
       "targetId": "grok",
       "relationType": "built_on",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://x.ai/company",
+        "https://x.ai/grok"
+      ]
     },
     {
-      "id": "e26",
-      "sourceId": "xai",
-      "targetId": "openai",
-      "relationType": "competes_with",
-      "weight": 1
+      "id": "e-github-copilot",
+      "sourceId": "github",
+      "targetId": "github-copilot",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://github.com/about",
+        "https://github.com/features/copilot"
+      ]
     },
     {
-      "id": "e27",
-      "sourceId": "diffusion",
-      "targetId": "midjourney",
+      "id": "e-microsoft-github",
+      "sourceId": "microsoft",
+      "targetId": "github",
+      "relationType": "acquired",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.microsoft.com/ai",
+        "https://github.com/about"
+      ]
+    },
+    {
+      "id": "e-microsoft-azure-openai",
+      "sourceId": "microsoft",
+      "targetId": "azure-openai-service",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.microsoft.com/ai",
+        "https://azure.microsoft.com/products/ai-services/openai-service"
+      ]
+    },
+    {
+      "id": "e-azure-openai-gpt4",
+      "sourceId": "azure-openai-service",
+      "targetId": "gpt4",
+      "relationType": "powered_by",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://azure.microsoft.com/products/ai-services/openai-service",
+        "https://openai.com/research/gpt-4"
+      ]
+    },
+    {
+      "id": "e-gpt4-copilot",
+      "sourceId": "gpt4",
+      "targetId": "github-copilot",
+      "relationType": "powered_by",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/research/gpt-4",
+        "https://github.com/features/copilot"
+      ]
+    },
+    {
+      "id": "e-cursor-claude",
+      "sourceId": "claude35-sonnet",
+      "targetId": "cursor",
+      "relationType": "powered_by",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.anthropic.com/news/claude-3-5-sonnet",
+        "https://www.cursor.com/"
+      ]
+    },
+    {
+      "id": "e-cursor-gpt4",
+      "sourceId": "gpt4o",
+      "targetId": "cursor",
+      "relationType": "powered_by",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/index/hello-gpt-4o/",
+        "https://www.cursor.com/"
+      ]
+    },
+    {
+      "id": "e-nvidia-cuda",
+      "sourceId": "nvidia",
+      "targetId": "cuda",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.nvidia.com/en-us/ai-data-science/",
+        "https://developer.nvidia.com/cuda-zone"
+      ]
+    },
+    {
+      "id": "e-nvidia-tensorrt",
+      "sourceId": "nvidia",
+      "targetId": "tensorrt",
+      "relationType": "built_on",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.nvidia.com/en-us/ai-data-science/",
+        "https://developer.nvidia.com/tensorrt"
+      ]
+    },
+    {
+      "id": "e-cuda-pytorch",
+      "sourceId": "cuda",
+      "targetId": "pytorch",
       "relationType": "uses",
-      "weight": 1
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://developer.nvidia.com/cuda-zone",
+        "https://pytorch.org/"
+      ]
+    },
+    {
+      "id": "e-tensorrt-vllm",
+      "sourceId": "tensorrt",
+      "targetId": "vllm",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://developer.nvidia.com/tensorrt",
+        "https://github.com/vllm-project/vllm"
+      ]
+    },
+    {
+      "id": "e-langchain-rag",
+      "sourceId": "langchain",
+      "targetId": "vector-database",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.langchain.com/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-llamaindex-rag",
+      "sourceId": "llamaindex",
+      "targetId": "vector-database",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.llamaindex.ai/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-pinecone-vector",
+      "sourceId": "pinecone",
+      "targetId": "vector-database",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.pinecone.io/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-weaviate-vector",
+      "sourceId": "weaviate",
+      "targetId": "vector-database",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://weaviate.io/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-qdrant-vector",
+      "sourceId": "qdrant",
+      "targetId": "vector-database",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://qdrant.tech/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-ray-vllm",
+      "sourceId": "ray",
+      "targetId": "vllm",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.ray.io/",
+        "https://github.com/vllm-project/vllm"
+      ]
+    },
+    {
+      "id": "e-kubernetes-ray",
+      "sourceId": "kubernetes",
+      "targetId": "ray",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://kubernetes.io/",
+        "https://www.ray.io/"
+      ]
+    },
+    {
+      "id": "e-vllm-llama3",
+      "sourceId": "vllm",
+      "targetId": "llama3",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://github.com/vllm-project/vllm",
+        "https://ai.meta.com/blog/meta-llama-3/"
+      ]
+    },
+    {
+      "id": "e-ollama-llama3",
+      "sourceId": "ollama",
+      "targetId": "llama3",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://ollama.com/",
+        "https://ai.meta.com/blog/meta-llama-3/"
+      ]
+    },
+    {
+      "id": "e-gradio-hf",
+      "sourceId": "gradio",
+      "targetId": "huggingface",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.gradio.app/",
+        "https://huggingface.co/"
+      ]
+    },
+    {
+      "id": "e-streamlit-openai",
+      "sourceId": "streamlit",
+      "targetId": "openai",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://streamlit.io/",
+        "https://openai.com/about/"
+      ]
+    },
+    {
+      "id": "e-openrouter-openai",
+      "sourceId": "openrouter",
+      "targetId": "openai",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openrouter.ai/",
+        "https://openai.com/about/"
+      ]
+    },
+    {
+      "id": "e-openrouter-anthropic",
+      "sourceId": "openrouter",
+      "targetId": "anthropic",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openrouter.ai/",
+        "https://www.anthropic.com/company"
+      ]
+    },
+    {
+      "id": "e-together-llama",
+      "sourceId": "together-ai",
+      "targetId": "llama",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.together.ai/",
+        "https://ai.meta.com/llama/"
+      ]
+    },
+    {
+      "id": "e-scale-openai",
+      "sourceId": "scale-ai",
+      "targetId": "openai",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://scale.com/",
+        "https://openai.com/about/"
+      ]
+    },
+    {
+      "id": "e-arxiv-transformer",
+      "sourceId": "arxiv",
+      "targetId": "attention-is-all-you-need",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://arxiv.org/",
+        "https://arxiv.org/abs/1706.03762"
+      ]
+    },
+    {
+      "id": "e-perplexity-rag",
+      "sourceId": "perplexity",
+      "targetId": "vector-database",
+      "relationType": "uses",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.perplexity.ai/",
+        "https://www.pinecone.io/learn/vector-database/"
+      ]
+    },
+    {
+      "id": "e-notion-openai",
+      "sourceId": "notion-ai",
+      "targetId": "openai",
+      "relationType": "related_to",
+      "weight": 1,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.notion.so/product/ai",
+        "https://openai.com/about/"
+      ]
+    },
+    {
+      "id": "e-openai-anthropic",
+      "sourceId": "openai",
+      "targetId": "anthropic",
+      "relationType": "competes_with",
+      "weight": 0.8,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://www.anthropic.com/company"
+      ]
+    },
+    {
+      "id": "e-openai-google",
+      "sourceId": "openai",
+      "targetId": "google-deepmind",
+      "relationType": "competes_with",
+      "weight": 0.8,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://openai.com/about/",
+        "https://deepmind.google/about/"
+      ]
+    },
+    {
+      "id": "e-anthropic-google",
+      "sourceId": "anthropic",
+      "targetId": "google-deepmind",
+      "relationType": "competes_with",
+      "weight": 0.8,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://www.anthropic.com/company",
+        "https://deepmind.google/about/"
+      ]
+    },
+    {
+      "id": "e-mistral-meta",
+      "sourceId": "mistral-ai",
+      "targetId": "meta",
+      "relationType": "competes_with",
+      "weight": 0.8,
+      "confidence": 0.82,
+      "sourceList": [
+        "https://mistral.ai/company/",
+        "https://ai.meta.com/"
+      ]
     }
   ]
 }

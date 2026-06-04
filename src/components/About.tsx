@@ -40,7 +40,7 @@ export default function About() {
           </h2>
           <div className="font-sans text-base text-gray-700 space-y-6 leading-relaxed max-w-3xl">
             <p>
-              The intelligence within OpenConstellation is sourced from a combination of manual curation and AI-assisted data extraction. The system supports full <strong>semi-automatic knowledge graph construction</strong>.
+              The intelligence within OpenConstellation is backed by a curated public-source graph served from the backend. Each production graph entity carries source URLs, while AI synthesis is used as an assistive layer for interpretation, learning paths, and completion drafts.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white border border-gray-200 p-6 shadow-sm">
@@ -63,7 +63,7 @@ export default function About() {
               </div>
             </div>
             <div className="bg-gray-50 border-l-4 border-gray-300 p-4 text-sm text-gray-600 italic">
-              <strong>Disclaimer:</strong> We are currently in an early access phase. The data represented in the map is seeded from the MVP graph and enhanced through backend APIs and AI synthesis as the ingestion pipeline matures.
+              <strong>Data note:</strong> The current map is no longer loaded from frontend mock data during normal operation. It is a backend-served curated graph built from public documentation, official product pages, papers, and open source project pages. Automated external ingestion and review workflows are still being expanded.
             </div>
           </div>
         </section>

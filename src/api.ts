@@ -1,4 +1,3 @@
-import { mockData } from './data';
 import type { GraphData, GraphEdge, GraphNode } from './types';
 
 export interface AiResult {
@@ -72,7 +71,7 @@ const DEFAULT_CONSTELLATION: UserConstellation = {
 };
 
 export async function fetchGraphData(): Promise<GraphData> {
-  return getJson<GraphData>('/api/graph', mockData);
+  return requestJson<GraphData>('/api/graph');
 }
 
 export async function fetchConstellation(): Promise<UserConstellation> {
@@ -82,11 +81,13 @@ export async function fetchConstellation(): Promise<UserConstellation> {
 export async function fetchNodeDetail(nodeId: string): Promise<NodeDetailResponse | null> {
   try {
     return await requestJson<NodeDetailResponse>(`/api/nodes/${encodeURIComponent(nodeId)}`);
-  } catch {
-    const node = mockData.nodes.find((item) => item.id === nodeId);
+  } catch (error) {
+    const fallback = await getMockGraphFallback();
+    if (!fallback) throw error;
+    const node = fallback.nodes.find((item) => item.id === nodeId);
     if (!node) return null;
-    const incomingEdges = mockData.edges.filter((edge) => edge.targetId === node.id);
-    const outgoingEdges = mockData.edges.filter((edge) => edge.sourceId === node.id);
+    const incomingEdges = fallback.edges.filter((edge) => edge.targetId === node.id);
+    const outgoingEdges = fallback.edges.filter((edge) => edge.sourceId === node.id);
     const relatedIds = new Set<string>([
       ...incomingEdges.map((edge) => edge.sourceId),
       ...outgoingEdges.map((edge) => edge.targetId),
@@ -96,7 +97,7 @@ export async function fetchNodeDetail(nodeId: string): Promise<NodeDetailRespons
       node,
       incomingEdges,
       outgoingEdges,
-      relatedNodes: mockData.nodes.filter((item) => relatedIds.has(item.id)),
+      relatedNodes: fallback.nodes.filter((item) => relatedIds.has(item.id)),
       events: node.events ?? [],
     };
   }
@@ -108,9 +109,11 @@ export async function fetchSearchResults(query: string): Promise<SearchResponse>
 
   try {
     return await requestJson<SearchResponse>(`/api/search?q=${encodeURIComponent(trimmed)}`);
-  } catch {
+  } catch (error) {
+    const fallback = await getMockGraphFallback();
+    if (!fallback) throw error;
     const normalized = trimmed.toLowerCase();
-    const items = mockData.nodes.filter(
+    const items = fallback.nodes.filter(
       (node) =>
         node.name.toLowerCase().includes(normalized) ||
         node.type.toLowerCase().includes(normalized) ||
@@ -123,31 +126,35 @@ export async function fetchSearchResults(query: string): Promise<SearchResponse>
 }
 
 export async function fetchTimeline(): Promise<TimelineResponse> {
+  const fallback = await getMockGraphFallback();
+  if (!fallback) return requestJson<TimelineResponse>('/api/timeline');
   return getJson<TimelineResponse>('/api/timeline', {
-    items: mockData.nodes
+    items: fallback.nodes
       .flatMap((node) => (node.events ?? []).map((event) => ({ ...event, node })))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-    total: mockData.nodes.reduce((sum, node) => sum + (node.events?.length ?? 0), 0),
+    total: fallback.nodes.reduce((sum, node) => sum + (node.events?.length ?? 0), 0),
   });
 }
 
 export async function fetchTechTree(): Promise<TechTreeResponse> {
+  const fallback = await getMockGraphFallback();
+  if (!fallback) return requestJson<TechTreeResponse>('/api/tech-tree');
   return getJson<TechTreeResponse>('/api/tech-tree', {
     tiers: [
       {
         id: 'foundations',
         name: 'Foundations',
-        nodes: mockData.nodes.filter((node) => node.type === 'Technology' || node.type === 'Research'),
+        nodes: fallback.nodes.filter((node) => node.type === 'Technology' || node.type === 'Research'),
       },
       {
         id: 'models',
         name: 'Models & Open Weights',
-        nodes: mockData.nodes.filter((node) => node.type === 'Model' || node.type === 'Open Source'),
+        nodes: fallback.nodes.filter((node) => node.type === 'Model' || node.type === 'Open Source'),
       },
       {
         id: 'applications',
         name: 'Applications',
-        nodes: mockData.nodes.filter((node) => node.type === 'Product'),
+        nodes: fallback.nodes.filter((node) => node.type === 'Product'),
       },
     ],
   });
@@ -222,6 +229,12 @@ async function getJson<T>(url: string, fallback: T): Promise<T> {
   } catch {
     return fallback;
   }
+}
+
+async function getMockGraphFallback(): Promise<GraphData | null> {
+  if (import.meta.env.VITE_ENABLE_MOCK_FALLBACK !== 'true') return null;
+  const mod = await import('./data');
+  return mod.mockData;
 }
 
 async function postJson<T>(url: string, body: unknown) {

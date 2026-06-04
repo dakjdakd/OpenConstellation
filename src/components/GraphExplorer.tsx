@@ -8,7 +8,7 @@ import GeneratingScreen from './GeneratingScreen';
 import { useAppStore } from '../store';
 
 export default function GraphExplorer() {
-  const { filteredNodes, filteredEdges, appState } = useAppStore();
+  const { filteredNodes, filteredEdges, appState, apiStatus, apiError, loadGraphFromApi } = useAppStore();
 
   return (
     <>
@@ -25,6 +25,28 @@ export default function GraphExplorer() {
       )}
 
       <div className="relative w-full h-full bg-white overflow-hidden">
+      {apiStatus === 'error' && (
+        <div className="absolute inset-x-4 top-28 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 z-40 max-w-xl border border-red-200 bg-white/95 backdrop-blur-md shadow-xl p-5">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-red-500 mb-2">Backend data service offline</p>
+          <h2 className="font-serif text-2xl text-black mb-2">Constellation index could not load</h2>
+          <p className="font-sans text-sm text-gray-600 mb-4">
+            The map now requires the real backend graph service. Start `npm.cmd run dev:api`, then reload the index.
+          </p>
+          {apiError && <p className="font-mono text-[10px] text-gray-500 mb-4 break-all">{apiError}</p>}
+          <button
+            onClick={() => void loadGraphFromApi()}
+            className="font-mono text-[10px] uppercase tracking-widest border border-black px-4 py-2 hover:bg-black hover:text-white transition-colors"
+          >
+            Retry Sync
+          </button>
+        </div>
+      )}
+
+      {apiStatus === 'loading' && filteredNodes.length === 0 && (
+        <div className="absolute inset-x-4 top-28 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 z-40 border border-gray-200 bg-white/90 backdrop-blur-md shadow-lg px-5 py-3">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500">Synchronizing backend graph...</p>
+        </div>
+      )}
       
       {/* Isolation Overlay - removed to keep background identical to original */}
       <div className={`absolute inset-0 pointer-events-none z-10 transition-colors duration-700 bg-transparent`} />
