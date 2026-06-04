@@ -1,0 +1,91 @@
+{
+  "favorites": [],
+  "collections": [
+    {
+      "id": "1",
+      "name": "Agents",
+      "nodes": [],
+      "createdAt": "2026-06-03T18:15:27.247Z",
+      "updatedAt": "2026-06-03T18:15:27.247Z",
+      "notes": {},
+      "sortOrder": []
+    },
+    {
+      "id": "2",
+      "name": "Foundational Models",
+      "nodes": [],
+      "createdAt": "2026-06-03T18:15:27.249Z",
+      "updatedAt": "2026-06-03T18:15:27.249Z",
+      "notes": {},
+      "sortOrder": []
+    }
+  ],
+  "recentViews": [
+    "chatgpt",
+    "sora",
+    "google",
+    "xai",
+    "mistral",
+    "openai",
+    "scale-ai",
+    "claude",
+    "qwen",
+    "transformer",
+    "github-copilot",
+    "diffusion"
+  ],
+  "recentViewDetails": [
+    {
+      "nodeId": "chatgpt",
+      "viewedAt": "2026-06-03T19:05:11.614Z"
+    },
+    {
+      "nodeId": "sora",
+      "viewedAt": "2026-06-03T19:05:01.919Z"
+    },
+    {
+      "nodeId": "google",
+      "viewedAt": "2026-06-03T19:04:51.963Z"
+    },
+    {
+      "nodeId": "xai",
+      "viewedAt": "2026-06-03T19:04:45.527Z"
+    },
+    {
+      "nodeId": "mistral",
+      "viewedAt": "2026-06-03T19:04:34.105Z"
+    },
+    {
+      "nodeId": "openai",
+      "viewedAt": "2026-06-03T19:03:26.186Z"
+    },
+    {
+      "nodeId": "scale-ai",
+      "viewedAt": "2026-06-03T18:59:19.362Z"
+    },
+    {
+      "nodeId": "claude",
+      "viewedAt": "2026-06-03T18:59:07.839Z"
+    },
+    {
+      "nodeId": "qwen",
+      "viewedAt": "2026-06-03T18:58:58.160Z"
+    },
+    {
+      "nodeId": "transformer",
+      "viewedAt": "2026-06-03T18:58:54.685Z"
+    },
+    {
+      "nodeId": "github-copilot",
+      "viewedAt": "2026-06-03T18:37:22.860Z"
+    },
+    {
+      "nodeId": "diffusion",
+      "viewedAt": "2026-06-03T18:32:20.617Z"
+    }
+  ],
+  "favoritePaths": [],
+  "notes": {},
+  "sortOrder": {},
+  "shareLinks": []
+}
