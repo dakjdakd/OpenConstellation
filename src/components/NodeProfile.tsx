@@ -1,17 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store';
-import { ExternalLink, ArrowLeft, ArrowRight, Zap, Box, Boxes, Share2, Bookmark, ArrowDown, Network, Sparkles } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Boxes, Share2, Bookmark, Network, Sparkles } from 'lucide-react';
 import AIGenerationBlock from './AIGenerationBlock';
+import {
+  fetchAiLearningPath,
+  fetchAiNodeCompletion,
+  fetchAiRecommendations,
+  fetchNodeDetail,
+  type AiResult,
+  type NodeDetailResponse,
+} from '../api';
 
 export default function NodeProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { nodes, edges } = useAppStore();
+  const { nodes, edges, favorites, addFavorite, removeFavorite } = useAppStore();
   const [syllabusExpanded, setSyllabusExpanded] = useState(false);
   const [errataSubmitted, setErrataSubmitted] = useState(false);
+  const [detail, setDetail] = useState<NodeDetailResponse | null>(null);
+  const [learningPath, setLearningPath] = useState<AiResult | null>(null);
+  const [recommendations, setRecommendations] = useState<AiResult | null>(null);
+  const [completion, setCompletion] = useState<AiResult | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setDetail(null);
+    setLearningPath(null);
+    setRecommendations(null);
+    setCompletion(null);
+
+    if (!id) return;
+
+    void fetchNodeDetail(id).then((next) => {
+      if (!cancelled) setDetail(next);
+    });
+    void fetchAiLearningPath(id).then((next) => {
+      if (!cancelled) setLearningPath(next);
+    }).catch(() => undefined);
+    void fetchAiRecommendations(id).then((next) => {
+      if (!cancelled) setRecommendations(next);
+    }).catch(() => undefined);
+    void fetchAiNodeCompletion(id).then((next) => {
+      if (!cancelled) setCompletion(next);
+    }).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
   
-  const node = nodes.find(n => n.id === id);
+  const fallbackNode = nodes.find(n => n.id === id);
+  const node = detail?.node ?? fallbackNode;
+  const relatedNodeMap = useMemo(
+    () => new Map([...(detail?.relatedNodes ?? []), ...nodes].map((item) => [item.id, item])),
+    [detail?.relatedNodes, nodes],
+  );
   
   if (!node) {
     return (
@@ -25,9 +69,11 @@ export default function NodeProfile() {
     );
   }
 
-  const incomingEdges = edges.filter(e => e.targetId === node.id);
-  const outgoingEdges = edges.filter(e => e.sourceId === node.id);
-  const getRelatedNode = (nid: string) => nodes.find(n => n.id === nid);
+  const incomingEdges = detail?.incomingEdges ?? edges.filter(e => e.targetId === node.id);
+  const outgoingEdges = detail?.outgoingEdges ?? edges.filter(e => e.sourceId === node.id);
+  const getRelatedNode = (nid: string) => relatedNodeMap.get(nid);
+  const isFavorite = favorites.includes(node.id);
+  const insight = detail?.aiInsight;
 
   return (
     <div className="w-full h-full overflow-y-auto bg-white grid-bg">
@@ -41,8 +87,12 @@ export default function NodeProfile() {
           </button>
           
           <div className="flex items-center gap-4">
-            <button className="text-gray-400 hover:text-black border border-gray-200 p-2 bg-white">
-              <Bookmark className="w-4 h-4" />
+            <button
+              onClick={() => isFavorite ? removeFavorite(node.id) : addFavorite(node.id)}
+              className={`border border-gray-200 p-2 bg-white transition-colors ${isFavorite ? 'text-black' : 'text-gray-400 hover:text-black'}`}
+              title={isFavorite ? 'Remove bookmark' : 'Save bookmark'}
+            >
+              <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
             <button className="text-gray-400 hover:text-black border border-gray-200 p-2 bg-white">
               <Share2 className="w-4 h-4" />
@@ -99,9 +149,9 @@ export default function NodeProfile() {
               
               <div className="mt-8">
                 <AIGenerationBlock
-                  content={node.aiSummary || `Within the broader ecosystem, ${node.name} acts as a vital structural component. Observing its connection density reveals significant dependencies from downstream layers.`}
-                  confidence={node.aiConfidence || 0.88}
-                  label="Strategic Position Analysis"
+                  content={insight?.content || node.aiSummary || `Within the broader ecosystem, ${node.name} acts as a vital structural component. Observing its connection density reveals significant dependencies from downstream layers.`}
+                  confidence={insight?.confidence || node.aiConfidence || 0.88}
+                  label={insight?.provider === 'deepseek' ? 'DeepSeek Strategic Analysis' : 'Strategic Position Analysis'}
                 />
               </div>
             </section>
@@ -303,10 +353,14 @@ export default function NodeProfile() {
               <div className="border border-dashed border-gray-300 bg-gray-50/50 p-6 space-y-4">
                  <p className="font-sans text-sm text-gray-500">Prerequisite cognitive steps for <span className="font-medium text-black">{node.name}</span></p>
                  <ol className="list-decimal list-inside space-y-3 font-sans text-sm text-gray-800">
-                   <li>Understand the core philosophy of {node.tags[0] || 'AI'}.</li>
-                   <li>Review the upstream dependencies on the map.</li>
-                   <li>Analyze architectural departure from classical norms.</li>
-                   {syllabusExpanded && (
+                   {(learningPath?.suggestions?.length ? learningPath.suggestions : [
+                     `Understand the core philosophy of ${node.tags[0] || 'AI'}.`,
+                     'Review the upstream dependencies on the map.',
+                     'Analyze architectural departure from classical norms.',
+                   ]).slice(0, syllabusExpanded ? 5 : 3).map((step) => (
+                     <li key={step}>{step}</li>
+                   ))}
+                   {syllabusExpanded && !learningPath?.suggestions?.length && (
                      <>
                        <li>Examine historical impact and ecosystem adoption.</li>
                        <li>Evaluate current research frontiers.</li>
@@ -314,6 +368,11 @@ export default function NodeProfile() {
                      </>
                    )}
                  </ol>
+                 {learningPath?.content && syllabusExpanded && (
+                   <p className="font-sans text-xs text-gray-500 leading-relaxed border-t border-gray-200 pt-4">
+                     {learningPath.content}
+                   </p>
+                 )}
                  <button 
                     onClick={() => setSyllabusExpanded(!syllabusExpanded)}
                     className="mt-4 font-mono text-[10px] uppercase tracking-widest hover:underline decoration-1 underline-offset-4 text-black cursor-pointer transition-all"
@@ -326,12 +385,21 @@ export default function NodeProfile() {
             <section>
               <div className="flex items-center gap-2 border-b border-black pb-2 mb-6">
                  <Sparkles className="w-4 h-4 text-black" />
-                 <h3 className="font-mono text-sm uppercase tracking-widest text-black">Human Verification</h3>
+                 <h3 className="font-mono text-sm uppercase tracking-widest text-black">AI Completion Notes</h3>
               </div>
               <div className="border border-gray-200 bg-white p-6 space-y-4 shadow-sm">
                  <p className="font-sans text-sm text-gray-600 leading-relaxed">
-                   Notice hallucinatory or outdated taxonomy? Contribute corrections to the unified matrix.
+                   {completion?.content || 'Notice hallucinatory or outdated taxonomy? Contribute corrections to the unified matrix.'}
                  </p>
+                 {completion?.metadata?.missingFields && Array.isArray(completion.metadata.missingFields) && completion.metadata.missingFields.length > 0 && (
+                   <div className="flex flex-wrap gap-2">
+                     {completion.metadata.missingFields.map((field) => (
+                       <span key={String(field)} className="px-2 py-1 border border-gray-200 bg-gray-50 font-mono text-[9px] uppercase tracking-widest text-gray-500">
+                         {String(field)}
+                       </span>
+                     ))}
+                   </div>
+                 )}
                  {errataSubmitted ? (
                     <div className="w-full font-mono text-[10px] bg-black text-white py-2 uppercase tracking-widest text-center">
                       Errata Logged
@@ -371,6 +439,19 @@ export default function NodeProfile() {
                  </div>
               </div>
             </section>
+
+            {recommendations?.suggestions?.length ? (
+              <section>
+                <h3 className="font-mono text-[10px] uppercase tracking-widest text-gray-500 border-b border-gray-200 pb-2 mb-4">AI Next Vectors</h3>
+                <div className="space-y-3">
+                  {recommendations.suggestions.slice(0, 3).map((item) => (
+                    <p key={item} className="border border-gray-100 bg-gray-50 p-3 font-sans text-xs text-gray-600 leading-relaxed">
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
           </div>
         </div>

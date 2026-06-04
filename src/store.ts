@@ -3,7 +3,10 @@ import { GraphNode, GraphEdge } from './types';
 import { mockData } from './data';
 import {
   clearSearchHistoryRemote,
+  clearRecentViewsRemote,
+  deleteCollection,
   deleteFavorite,
+  deleteNodeFromCollection,
   fetchConstellation,
   fetchGraphData,
   saveCollection,
@@ -64,8 +67,11 @@ interface AppState {
   addFavorite: (id: string) => void;
   removeFavorite: (id: string) => void;
   createCollection: (name: string, color?: string) => void;
+  removeCollection: (collectionId: string) => void;
   addNodeToCollection: (collectionId: string, nodeId: string) => void;
+  removeNodeFromCollection: (collectionId: string, nodeId: string) => void;
   addRecentView: (id: string) => void;
+  clearRecentViews: () => void;
 }
 
 function applyGraphFilters(state: AppState) {
@@ -194,15 +200,29 @@ export const useAppStore = create<AppState>((set, get) => ({
     set(s => ({ collections: [...s.collections, fallback] }));
     void saveCollection(name, color).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
   },
+  removeCollection: (collectionId) => {
+    set(s => ({ collections: s.collections.filter(c => c.id !== collectionId) }));
+    void deleteCollection(collectionId).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
   addNodeToCollection: (collectionId, nodeId) => {
     set(s => ({
       collections: s.collections.map(c => c.id === collectionId ? { ...c, nodes: [...new Set([...c.nodes, nodeId])] } : c)
     }));
     void saveNodeToCollection(collectionId, nodeId).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
   },
+  removeNodeFromCollection: (collectionId, nodeId) => {
+    set(s => ({
+      collections: s.collections.map(c => c.id === collectionId ? { ...c, nodes: c.nodes.filter(id => id !== nodeId) } : c)
+    }));
+    void deleteNodeFromCollection(collectionId, nodeId).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
   addRecentView: (id) => {
     set(s => ({ recentViews: [id, ...s.recentViews.filter(x => x !== id)].slice(0, 15) }));
     void saveRecentView(id).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
+  clearRecentViews: () => {
+    set({ recentViews: [] });
+    void clearRecentViewsRemote().then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
   },
 
   setIsolatedNodeId: (id) => {

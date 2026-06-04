@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { Bookmark, Folder, FolderPlus, Clock, Plus, Compass } from 'lucide-react';
+import { Bookmark, Folder, FolderPlus, Clock, Compass, Trash2, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAppStore } from '../store';
 
 export default function Saved() {
-  const { favorites, collections, recentViews, nodes, createCollection } = useAppStore();
+  const {
+    favorites,
+    collections,
+    recentViews,
+    nodes,
+    createCollection,
+    removeCollection,
+    removeNodeFromCollection,
+    clearRecentViews,
+    setIsolatedNodeId,
+  } = useAppStore();
   const [newColName, setNewColName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -57,21 +67,68 @@ export default function Saved() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-20 mb-12">
-          {collections.map(col => (
+          {collections.map(col => {
+            const collectionNodes = col.nodes.map(id => nodes.find(n => n.id === id)).filter(Boolean);
+            return (
             <div key={col.id} className="border border-gray-200 bg-white p-6 hover:border-black hover:shadow-lg transition-all flex flex-col group">
-              <div className="flex items-center gap-2 mb-4 text-gray-400 group-hover:text-black">
-                <Folder className="w-5 h-5" />
-                <h3 className="font-sans font-medium text-black">{col.name}</h3>
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2 text-gray-400 group-hover:text-black min-w-0">
+                  <Folder className="w-5 h-5 shrink-0" />
+                  <h3 className="font-sans font-medium text-black truncate">{col.name}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeCollection(col.id)}
+                  aria-label={`Delete ${col.name} collection`}
+                  className="text-gray-300 hover:text-black transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
               <p className="font-sans text-sm text-gray-500 mb-6 flex-1">
                 {col.nodes.length} nodes saved in this collection.
               </p>
+              {collectionNodes.length > 0 && (
+                <div className="space-y-2 mb-5">
+                  {collectionNodes.slice(0, 3).map((node) => (
+                    <div key={node!.id} className="flex items-center gap-2 text-sm font-sans">
+                      <Link to={`/node/${node!.id}`} className="text-gray-600 hover:text-black hover:underline flex-1 truncate">{node!.name}</Link>
+                      <button
+                        type="button"
+                        onClick={() => removeNodeFromCollection(col.id, node!.id)}
+                        aria-label={`Remove ${node!.name} from ${col.name}`}
+                        className="text-gray-300 hover:text-black transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {collectionNodes.length > 3 && (
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">
+                      +{collectionNodes.length - 3} more nodes
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex gap-2 font-mono text-[10px] uppercase text-gray-400 tracking-widest">
-                <button className="border border-gray-200 px-2 py-1 hover:border-black hover:text-black transition-colors bg-gray-50">View List</button>
-                <button className="border border-gray-200 px-2 py-1 hover:border-black hover:text-black transition-colors bg-gray-50">View in Map</button>
+                {collectionNodes[0] ? (
+                  <Link to={`/node/${collectionNodes[0].id}`} className="border border-gray-200 px-2 py-1 hover:border-black hover:text-black transition-colors bg-gray-50">View First</Link>
+                ) : (
+                  <span className="border border-gray-100 px-2 py-1 bg-gray-50 text-gray-300">Empty</span>
+                )}
+                {collectionNodes[0] && (
+                  <Link
+                    to="/explore"
+                    onClick={() => setIsolatedNodeId(collectionNodes[0]!.id)}
+                    className="border border-gray-200 px-2 py-1 hover:border-black hover:text-black transition-colors bg-gray-50"
+                  >
+                    View in Map
+                  </Link>
+                )}
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -99,10 +156,17 @@ export default function Saved() {
 
           {/* History */}
           <div>
-            <h2 className="font-mono text-sm uppercase tracking-widest text-black flex items-center gap-2 border-b border-gray-200 pb-2 mb-6">
-              <Clock className="w-4 h-4" />
-              Recent Exploration
-            </h2>
+            <div className="border-b border-gray-200 pb-2 mb-6 flex items-center justify-between gap-3">
+              <h2 className="font-mono text-sm uppercase tracking-widest text-black flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                Recent Exploration
+              </h2>
+              {recentNodes.length > 0 && (
+                <button type="button" onClick={clearRecentViews} className="font-mono text-[10px] uppercase tracking-widest text-gray-400 hover:text-black">
+                  Clear
+                </button>
+              )}
+            </div>
             <div className="space-y-3">
               {recentNodes.length === 0 ? (
                 <p className="text-sm font-sans text-gray-400 italic">No recent history.</p>
@@ -111,7 +175,7 @@ export default function Saved() {
                   <div key={`${n!.id}-${idx}`} className="flex items-center gap-4 text-sm font-sans group">
                     <span className="text-gray-300 font-mono text-[10px]">0{idx + 1}</span>
                     <Link to={`/node/${n!.id}`} className="text-gray-600 hover:text-black hover:underline flex-1">{n!.name}</Link>
-                    <Link to="/" onClick={() => useAppStore.getState().setIsolatedNodeId(n!.id)} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-black">
+                    <Link to="/explore" onClick={() => useAppStore.getState().setIsolatedNodeId(n!.id)} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-black" aria-label={`Locate ${n!.name} in map`}>
                       <Compass className="w-4 h-4" />
                     </Link>
                   </div>

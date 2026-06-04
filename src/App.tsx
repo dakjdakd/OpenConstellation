@@ -24,6 +24,7 @@ export default function App() {
         <main className="flex-1 relative overflow-hidden">
           <Routes>
             <Route path="/" element={<GraphExplorer />} />
+            <Route path="/explore" element={<GraphExplorer />} />
             <Route path="/node/:id" element={<NodeProfile />} />
             <Route path="/search" element={<SearchExplorer />} />
             <Route path="/timeline" element={<Timeline />} />

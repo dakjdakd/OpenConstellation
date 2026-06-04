@@ -1,5 +1,51 @@
 import { mockData } from './data';
-import type { GraphData } from './types';
+import type { GraphData, GraphEdge, GraphNode } from './types';
+
+export interface AiResult {
+  task: 'insight' | 'complete-node' | 'learning-path' | 'recommendations';
+  provider: 'deepseek' | 'fallback';
+  model: string;
+  confidence: number;
+  source: string;
+  editable: boolean;
+  content: string;
+  suggestions: string[];
+  metadata: Record<string, unknown>;
+}
+
+export interface NodeDetailResponse {
+  node: GraphNode;
+  incomingEdges: GraphEdge[];
+  outgoingEdges: GraphEdge[];
+  relatedNodes: GraphNode[];
+  events: Array<{ date: string; title?: string; description: string }>;
+  aiInsight?: AiResult;
+}
+
+export interface SearchResponse {
+  query: string;
+  items: GraphNode[];
+  total: number;
+  aiInterpretation?: AiResult;
+}
+
+export interface TimelineResponse {
+  items: Array<{
+    date: string;
+    title?: string;
+    description: string;
+    node: Pick<GraphNode, 'id' | 'name' | 'type' | 'tags'>;
+  }>;
+  total: number;
+}
+
+export interface TechTreeResponse {
+  tiers: Array<{
+    id: string;
+    name: string;
+    nodes: Array<Pick<GraphNode, 'id' | 'name' | 'type' | 'subtitle' | 'description' | 'tags'>>;
+  }>;
+}
 
 export interface CollectionRecord {
   id: string;
@@ -31,6 +77,92 @@ export async function fetchGraphData(): Promise<GraphData> {
 
 export async function fetchConstellation(): Promise<UserConstellation> {
   return getJson<UserConstellation>('/api/me/constellation', DEFAULT_CONSTELLATION);
+}
+
+export async function fetchNodeDetail(nodeId: string): Promise<NodeDetailResponse | null> {
+  try {
+    return await requestJson<NodeDetailResponse>(`/api/nodes/${encodeURIComponent(nodeId)}`);
+  } catch {
+    const node = mockData.nodes.find((item) => item.id === nodeId);
+    if (!node) return null;
+    const incomingEdges = mockData.edges.filter((edge) => edge.targetId === node.id);
+    const outgoingEdges = mockData.edges.filter((edge) => edge.sourceId === node.id);
+    const relatedIds = new Set<string>([
+      ...incomingEdges.map((edge) => edge.sourceId),
+      ...outgoingEdges.map((edge) => edge.targetId),
+    ]);
+
+    return {
+      node,
+      incomingEdges,
+      outgoingEdges,
+      relatedNodes: mockData.nodes.filter((item) => relatedIds.has(item.id)),
+      events: node.events ?? [],
+    };
+  }
+}
+
+export async function fetchSearchResults(query: string): Promise<SearchResponse> {
+  const trimmed = query.trim();
+  if (!trimmed) return { query: '', items: [], total: 0 };
+
+  try {
+    return await requestJson<SearchResponse>(`/api/search?q=${encodeURIComponent(trimmed)}`);
+  } catch {
+    const normalized = trimmed.toLowerCase();
+    const items = mockData.nodes.filter(
+      (node) =>
+        node.name.toLowerCase().includes(normalized) ||
+        node.type.toLowerCase().includes(normalized) ||
+        node.subtitle.toLowerCase().includes(normalized) ||
+        node.description.toLowerCase().includes(normalized) ||
+        node.tags.some((tag) => tag.toLowerCase().includes(normalized)),
+    );
+    return { query: trimmed, items, total: items.length };
+  }
+}
+
+export async function fetchTimeline(): Promise<TimelineResponse> {
+  return getJson<TimelineResponse>('/api/timeline', {
+    items: mockData.nodes
+      .flatMap((node) => (node.events ?? []).map((event) => ({ ...event, node })))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
+    total: mockData.nodes.reduce((sum, node) => sum + (node.events?.length ?? 0), 0),
+  });
+}
+
+export async function fetchTechTree(): Promise<TechTreeResponse> {
+  return getJson<TechTreeResponse>('/api/tech-tree', {
+    tiers: [
+      {
+        id: 'foundations',
+        name: 'Foundations',
+        nodes: mockData.nodes.filter((node) => node.type === 'Technology' || node.type === 'Research'),
+      },
+      {
+        id: 'models',
+        name: 'Models & Open Weights',
+        nodes: mockData.nodes.filter((node) => node.type === 'Model' || node.type === 'Open Source'),
+      },
+      {
+        id: 'applications',
+        name: 'Applications',
+        nodes: mockData.nodes.filter((node) => node.type === 'Product'),
+      },
+    ],
+  });
+}
+
+export async function fetchAiLearningPath(nodeId: string) {
+  return requestJson<AiResult>(`/api/ai/learning-path/${encodeURIComponent(nodeId)}`);
+}
+
+export async function fetchAiRecommendations(nodeId: string) {
+  return requestJson<AiResult>(`/api/ai/recommendations/${encodeURIComponent(nodeId)}`);
+}
+
+export async function fetchAiNodeCompletion(nodeId: string) {
+  return requestJson<AiResult>(`/api/ai/complete-node/${encodeURIComponent(nodeId)}`);
 }
 
 export async function saveFavorite(nodeId: string) {

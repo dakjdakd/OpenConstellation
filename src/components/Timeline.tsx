@@ -1,18 +1,43 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '../store';
 import { Link } from 'react-router-dom';
-import { Play, Square, FastForward } from 'lucide-react';
+import { Play } from 'lucide-react';
 import AIGenerationBlock from './AIGenerationBlock';
 import { AnimatePresence } from 'motion/react';
 import TerminalPlayback from './TerminalPlayback';
+import { fetchTimeline, type TimelineResponse } from '../api';
+import type { GraphNode } from '../types';
 
 export default function Timeline() {
   const { nodes, setIsolatedNodeId } = useAppStore();
+  const [timeline, setTimeline] = useState<TimelineResponse | null>(null);
   
-  // Aggregate all events from nodes
-  const allEvents = nodes.flatMap(n => 
-    (n.events || []).map(e => ({ ...e, node: n }))
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  useEffect(() => {
+    let cancelled = false;
+    void fetchTimeline().then((next) => {
+      if (!cancelled) setTimeline(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const allEvents = (
+    timeline?.items.map((event) => ({
+      ...event,
+      node: nodeById.get(event.node.id) ?? ({
+        ...event.node,
+        subtitle: '',
+        description: '',
+        popularity: 0,
+        status: 'Active',
+      } as GraphNode),
+    })) ??
+    nodes.flatMap(n =>
+      (n.events || []).map(e => ({ ...e, node: n }))
+    ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  );
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(-1);

@@ -1,21 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Zap, Box, Compass } from 'lucide-react';
 import AIGenerationBlock from './AIGenerationBlock';
+import { fetchSearchResults, type AiResult } from '../api';
+import type { GraphNode } from '../types';
 
 export default function SearchExplorer() {
-  const { nodes } = useAppStore();
+  const { nodes, addSearchHistory } = useAppStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawQuery = searchParams.get('q') || '';
   const query = rawQuery.trim().toLowerCase();
+  const [apiResults, setApiResults] = useState<GraphNode[] | null>(null);
+  const [aiInterpretation, setAiInterpretation] = useState<AiResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const results = query ? nodes.filter(n => 
+  const fallbackResults = query ? nodes.filter(n => 
     n.name.toLowerCase().includes(query) ||
     n.type.toLowerCase().includes(query) ||
     n.subtitle.toLowerCase().includes(query) ||
+    n.description.toLowerCase().includes(query) ||
     n.tags.some(t => t.toLowerCase().includes(query))
   ) : [];
+  const results = apiResults ?? fallbackResults;
+
+  useEffect(() => {
+    let cancelled = false;
+    setApiResults(null);
+    setAiInterpretation(null);
+
+    if (!rawQuery.trim()) {
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    void fetchSearchResults(rawQuery).then((response) => {
+      if (cancelled) return;
+      setApiResults(response.items);
+      setAiInterpretation(response.aiInterpretation ?? null);
+      addSearchHistory(response.query);
+    }).catch(() => undefined).finally(() => {
+      if (!cancelled) setIsSearching(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [rawQuery, addSearchHistory]);
 
   return (
     <div className="w-full h-full pt-14 flex overflow-hidden grid-bg">
@@ -38,6 +70,7 @@ export default function SearchExplorer() {
             <h1 className="font-serif text-4xl mb-2">Search Results</h1>
             <p className="font-mono text-xs uppercase tracking-widest text-gray-500">
               Query: [{rawQuery || 'None'}] // {results.length} records found
+              {isSearching ? ' // syncing backend index' : ''}
             </p>
           </div>
 
@@ -76,7 +109,7 @@ export default function SearchExplorer() {
                   </Link>
                   <div className="md:absolute static mt-6 md:mt-0 flex justify-end bottom-8 right-8 md:top-8 md:bottom-auto opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-500 transform md:translate-y-2 md:group-hover:translate-y-0 z-20">
                     <Link 
-                      to="/" 
+                      to="/explore" 
                       onClick={() => useAppStore.getState().setSelectedNodeId(r.id)}
                       className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] border border-gray-200 md:border-white/80 bg-white/80 backdrop-blur-md shadow-sm md:shadow-lg rounded-full px-5 py-2.5 hover:scale-105 hover:bg-white text-black transition-all"
                     >
@@ -98,21 +131,22 @@ export default function SearchExplorer() {
           {query ? (
              <div className="space-y-6">
                <AIGenerationBlock 
-                 content={`The concept of "${query}" appears frequently within foundational layers of the model ecosystem. Entities returning in this cluster generally represent high-visibility infrastructure or primary application interfaces.`}
-                 confidence={0.92}
-                 label="Cluster Synthesis"
+                 content={aiInterpretation?.content || `The concept of "${query}" appears frequently within foundational layers of the model ecosystem. Entities returning in this cluster generally represent high-visibility infrastructure or primary application interfaces.`}
+                 confidence={aiInterpretation?.confidence || 0.92}
+                 label={aiInterpretation?.provider === 'deepseek' ? 'DeepSeek Cluster Synthesis' : 'Cluster Synthesis'}
                />
               <div className="border border-gray-200 p-4 bg-white mt-6">
                 <h4 className="font-serif italic text-sm text-gray-500 mb-3">Suggested Exploration Vectors</h4>
                 <ul className="space-y-2 font-sans text-sm">
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-0.5">·</span>
-                    <span>Trace structural derivations to <Link to="/tech" className="underline">Tech Tree branches</Link></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-gray-400 mt-0.5">·</span>
-                    <span>Observe parallel competitor topologies.</span>
-                  </li>
+                  {(aiInterpretation?.suggestions?.length ? aiInterpretation.suggestions : [
+                    'Trace structural derivations to Tech Tree branches.',
+                    'Observe parallel competitor topologies.',
+                  ]).slice(0, 3).map((item) => (
+                    <li key={item} className="flex items-start gap-2">
+                      <span className="text-gray-400 mt-0.5">·</span>
+                      <span>{item.includes('Tech Tree') ? <><Link to="/tech" className="underline">Tech Tree</Link> branches reveal the structural derivations.</> : item}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>

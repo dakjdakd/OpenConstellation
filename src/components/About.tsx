@@ -26,7 +26,7 @@ export default function About() {
           </h2>
           <div className="font-sans text-base text-gray-700 space-y-4 leading-relaxed max-w-3xl">
             <p>
-              In the rapidly evolving landscape of AI, it is difficult to see the forest for the trees. New models, companies, and technologies launch daily, but their relationships—who builds on what, who competes with whom, and what technological lineages they share—are often scattered across news articles, academic papers, and source code.
+              In the rapidly evolving landscape of AI, it is difficult to see the forest for the trees. New models, companies, and technologies launch daily, but their relationships, from who builds on what to who competes with whom, are often scattered across news articles, academic papers, and source code.
             </p>
             <p>
               <strong>OpenConstellation</strong> is designed not as a simple database or list, but as a living, explorable map. By representing the AI ecosystem as a network of nodes and edges, we allow researchers, investors, and builders to intuitively explore connections that would otherwise remain hidden.
@@ -63,7 +63,7 @@ export default function About() {
               </div>
             </div>
             <div className="bg-gray-50 border-l-4 border-gray-300 p-4 text-sm text-gray-600 italic">
-              <strong>Disclaimer:</strong> We are currently in an early access phase. The data represented in the map may contain placeholders or mock components to demonstrate the information architecture before production ingestion pipelines go live.
+              <strong>Disclaimer:</strong> We are currently in an early access phase. The data represented in the map is seeded from the MVP graph and enhanced through backend APIs and AI synthesis as the ingestion pipeline matures.
             </div>
           </div>
         </section>
@@ -96,7 +96,7 @@ export default function About() {
              Ready to explore the universe?
            </p>
            <div className="flex justify-center">
-             <Link to="/" className="font-mono text-xs uppercase tracking-[0.2em] bg-black text-white px-8 py-4 hover:bg-gray-800 transition-colors shadow-lg">
+             <Link to="/explore" className="font-mono text-xs uppercase tracking-[0.2em] bg-black text-white px-8 py-4 hover:bg-gray-800 transition-colors shadow-lg">
                Enter The Map
              </Link>
            </div>
