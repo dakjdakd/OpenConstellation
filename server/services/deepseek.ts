@@ -20,6 +20,22 @@ export interface AiResult {
   metadata: Record<string, unknown>;
 }
 
+export interface AiProviderStatus {
+  configured: boolean;
+  provider: 'deepseek' | 'fallback';
+  model: string;
+  baseUrl: string;
+  keySource?: 'DEEPSEEK_API_KEY' | 'OPENAI_API_KEY';
+}
+
+export interface AiProviderProbe {
+  ok: boolean;
+  status: AiProviderStatus;
+  latencyMs: number;
+  message: string;
+  providerHttpStatus?: number;
+}
+
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -34,6 +50,85 @@ export function getAiConfig() {
     baseUrl: (process.env.DEEPSEEK_BASE_URL || process.env.OPENAI_BASE_URL || DEFAULT_BASE_URL).replace(/\/$/, ''),
     model: process.env.DEEPSEEK_MODEL || process.env.OPENAI_MODEL || DEFAULT_MODEL,
   };
+}
+
+export function getAiProviderStatus(): AiProviderStatus {
+  const config = getAiConfig();
+  const keySource = process.env.DEEPSEEK_API_KEY
+    ? 'DEEPSEEK_API_KEY'
+    : process.env.OPENAI_API_KEY
+      ? 'OPENAI_API_KEY'
+      : undefined;
+
+  return {
+    configured: Boolean(config.apiKey),
+    provider: config.apiKey ? 'deepseek' : 'fallback',
+    model: config.model,
+    baseUrl: config.baseUrl,
+    ...(keySource ? { keySource } : {}),
+  };
+}
+
+export function shouldUseCachedAiResult(cached: AiResult | undefined) {
+  if (!cached) return false;
+  const status = getAiProviderStatus();
+  return !(status.configured && cached.provider === 'fallback');
+}
+
+export async function probeAiProvider(): Promise<AiProviderProbe> {
+  const startedAt = Date.now();
+  const config = getAiConfig();
+  const status = getAiProviderStatus();
+
+  if (!config.apiKey) {
+    return {
+      ok: false,
+      status,
+      latencyMs: Date.now() - startedAt,
+      message: 'AI provider is not configured. Set DEEPSEEK_API_KEY or OPENAI_API_KEY.',
+    };
+  }
+
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [
+          {
+            role: 'system',
+            content: 'Return compact JSON only.',
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({ ping: 'openconstellation-ai-provider-probe' }),
+          },
+        ],
+        temperature: 0,
+        max_tokens: 64,
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    return {
+      ok: response.ok,
+      status,
+      latencyMs: Date.now() - startedAt,
+      message: response.ok ? 'AI provider responded successfully.' : `AI provider returned HTTP ${response.status}.`,
+      providerHttpStatus: response.status,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      status,
+      latencyMs: Date.now() - startedAt,
+      message: error instanceof Error ? error.message : 'AI provider probe failed.',
+    };
+  }
 }
 
 export async function generateAiResult(payload: AiRequestPayload): Promise<AiResult> {

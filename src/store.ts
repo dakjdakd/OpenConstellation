@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 import { GraphNode, GraphEdge } from './types';
 import { mockData } from './data';
+import {
+  clearSearchHistoryRemote,
+  deleteFavorite,
+  fetchConstellation,
+  fetchGraphData,
+  saveCollection,
+  saveFavorite,
+  saveNodeToCollection,
+  saveRecentView,
+  saveSearchHistory,
+  type CollectionRecord,
+} from './api';
 
 interface AppState {
   searchQuery: string;
@@ -15,6 +27,9 @@ interface AppState {
   edges: GraphEdge[];
   filteredNodes: GraphNode[];
   filteredEdges: GraphEdge[];
+  isApiBacked: boolean;
+  apiStatus: 'idle' | 'loading' | 'ready' | 'fallback';
+  loadGraphFromApi: () => Promise<void>;
   activeFilterType: string | null;
   setActiveFilterType: (type: string | null) => void;
   activeRelationFilter: string | null;
@@ -44,13 +59,66 @@ interface AppState {
   setExploreMode: (explore: boolean) => void;
 
   favorites: string[];
-  collections: { id: string; name: string; nodes: string[]; color?: string }[];
+  collections: CollectionRecord[];
   recentViews: string[];
   addFavorite: (id: string) => void;
   removeFavorite: (id: string) => void;
   createCollection: (name: string, color?: string) => void;
   addNodeToCollection: (collectionId: string, nodeId: string) => void;
   addRecentView: (id: string) => void;
+}
+
+function applyGraphFilters(state: AppState) {
+  const { nodes, edges, activeFilterType, activeRelationFilter, activePopularityFilter, activeCategoryFilter, activeTimeRange, isolatedNodeId } = state;
+  let fn = nodes;
+  let fe = edges;
+
+  if (isolatedNodeId) {
+    const connected = new Set<string>([isolatedNodeId]);
+    edges.forEach(e => {
+      if (e.sourceId === isolatedNodeId) connected.add(e.targetId);
+      if (e.targetId === isolatedNodeId) connected.add(e.sourceId);
+    });
+    fn = fn.filter(n => connected.has(n.id));
+    fe = fe.filter(e => connected.has(e.sourceId) && connected.has(e.targetId));
+  }
+
+  if (activeFilterType) {
+    fn = fn.filter(n => n.type === activeFilterType);
+  }
+
+  if (activePopularityFilter) {
+    if (activePopularityFilter === 'hot') fn = fn.filter(n => n.popularity >= 9);
+    else if (activePopularityFilter === 'rising') fn = fn.filter(n => n.popularity >= 7 && n.popularity < 9);
+    else fn = fn.filter(n => n.popularity < 7);
+  }
+
+  if (activeCategoryFilter) {
+    fn = fn.filter(n => n.tags.some(tag => tag.toLowerCase() === activeCategoryFilter.toLowerCase()));
+  }
+
+  if (activeTimeRange) {
+    const [start, end] = activeTimeRange;
+    fn = fn.filter(n => {
+      if (!n.foundedAt) return false;
+      const y = new Date(n.foundedAt).getFullYear();
+      return y >= start && y <= end;
+    });
+  }
+
+  if (activeRelationFilter) {
+    fe = fe.filter(e => e.relationType === activeRelationFilter);
+    const connected = new Set<string>();
+    fe.forEach(e => { connected.add(e.sourceId); connected.add(e.targetId); });
+    fn = fn.filter(n => connected.has(n.id));
+  }
+
+  if (!activeRelationFilter) {
+    const fnIds = new Set(fn.map(n => n.id));
+    fe = edges.filter(e => fnIds.has(e.sourceId) && fnIds.has(e.targetId));
+  }
+
+  return { filteredNodes: fn, filteredEdges: fe };
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -69,6 +137,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   edges: mockData.edges,
   filteredNodes: mockData.nodes,
   filteredEdges: mockData.edges,
+  isApiBacked: false,
+  apiStatus: 'idle',
+  loadGraphFromApi: async () => {
+    set({ apiStatus: 'loading' });
+    const [graph, constellation] = await Promise.all([fetchGraphData(), fetchConstellation()]);
+    set((state) => ({
+      nodes: graph.nodes,
+      edges: graph.edges,
+      favorites: constellation.favorites,
+      collections: constellation.collections,
+      recentViews: constellation.recentViews,
+      searchHistory: constellation.searchHistory,
+      isApiBacked: graph !== mockData,
+      apiStatus: graph === mockData ? 'fallback' : 'ready',
+      ...applyGraphFilters({
+        ...state,
+        nodes: graph.nodes,
+        edges: graph.edges,
+        favorites: constellation.favorites,
+        collections: constellation.collections,
+        recentViews: constellation.recentViews,
+        searchHistory: constellation.searchHistory,
+      }),
+    }));
+  },
   activeFilterType: null,
   activeRelationFilter: null,
   activePopularityFilter: null,
@@ -88,13 +181,29 @@ export const useAppStore = create<AppState>((set, get) => ({
   favorites: [],
   collections: [{id: '1', name: 'Agents', nodes: []}, {id: '2', name: 'Foundational Models', nodes: []}],
   recentViews: [],
-  addFavorite: (id) => set(s => ({ favorites: [...s.favorites.filter(x => x !== id), id] })),
-  removeFavorite: (id) => set(s => ({ favorites: s.favorites.filter(x => x !== id) })),
-  createCollection: (name, color) => set(s => ({ collections: [...s.collections, { id: Math.random().toString(), name, nodes: [], color }] })),
-  addNodeToCollection: (collectionId, nodeId) => set(s => ({
-    collections: s.collections.map(c => c.id === collectionId ? { ...c, nodes: [...new Set([...c.nodes, nodeId])] } : c)
-  })),
-  addRecentView: (id) => set(s => ({ recentViews: [id, ...s.recentViews.filter(x => x !== id)].slice(0, 15) })),
+  addFavorite: (id) => {
+    set(s => ({ favorites: [...s.favorites.filter(x => x !== id), id] }));
+    void saveFavorite(id).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
+  removeFavorite: (id) => {
+    set(s => ({ favorites: s.favorites.filter(x => x !== id) }));
+    void deleteFavorite(id).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
+  createCollection: (name, color) => {
+    const fallback = { id: Math.random().toString(), name, nodes: [], color };
+    set(s => ({ collections: [...s.collections, fallback] }));
+    void saveCollection(name, color).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
+  addNodeToCollection: (collectionId, nodeId) => {
+    set(s => ({
+      collections: s.collections.map(c => c.id === collectionId ? { ...c, nodes: [...new Set([...c.nodes, nodeId])] } : c)
+    }));
+    void saveNodeToCollection(collectionId, nodeId).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
+  addRecentView: (id) => {
+    set(s => ({ recentViews: [id, ...s.recentViews.filter(x => x !== id)].slice(0, 15) }));
+    void saveRecentView(id).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
+  },
 
   setIsolatedNodeId: (id) => {
     set({ isolatedNodeId: id });
@@ -134,61 +243,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   searchHistory: [],
   addSearchHistory: (query) => set((state) => {
     const nh = [query, ...state.searchHistory.filter(q => q !== query)].slice(0, 10);
+    void saveSearchHistory(query).then(next => set({ favorites: next.favorites, collections: next.collections, recentViews: next.recentViews, searchHistory: next.searchHistory })).catch(() => undefined);
     return { searchHistory: nh };
   }),
-  clearSearchHistory: () => set({ searchHistory: [] }),
+  clearSearchHistory: () => {
+    set({ searchHistory: [] });
+    void clearSearchHistoryRemote()
+      .then((next) =>
+        set({
+          favorites: next.favorites,
+          collections: next.collections,
+          recentViews: next.recentViews,
+          searchHistory: next.searchHistory,
+        }),
+      )
+      .catch(() => undefined);
+  },
   applyFilters: () => {
-    const { nodes, edges, activeFilterType, activeRelationFilter, activePopularityFilter, activeCategoryFilter, activeTimeRange, isolatedNodeId } = get();
-    let fn = nodes;
-    let fe = edges;
-
-    if (isolatedNodeId) {
-      const connected = new Set<string>([isolatedNodeId]);
-      edges.forEach(e => {
-        if (e.sourceId === isolatedNodeId) connected.add(e.targetId);
-        if (e.targetId === isolatedNodeId) connected.add(e.sourceId);
-      });
-      fn = fn.filter(n => connected.has(n.id));
-      fe = fe.filter(e => connected.has(e.sourceId) && connected.has(e.targetId));
-    }
-
-    if (activeFilterType) {
-      fn = fn.filter(n => n.type === activeFilterType);
-    }
-    
-    // We assume data has these fields, or we use defaults if missing
-    if (activePopularityFilter) {
-      // Hot, Rising, Classic. Since our MockData doesn't fully support this, let's fake it based on some logic or ignore if missing.
-      // Usually, n.popularity is a number or string. Let's assume popularity > 80 is Hot etc for now.
-      if (activePopularityFilter === 'hot') fn = fn.filter(n => (n as any).popularity > 85);
-      else if (activePopularityFilter === 'rising') fn = fn.filter(n => (n as any).popularity > 70 && (n as any).popularity <= 85);
-      else fn = fn.filter(n => (n as any).popularity <= 70);
-    }
-
-    if (activeCategoryFilter) {
-      fn = fn.filter(n => n.tags.includes(activeCategoryFilter));
-    }
-
-    if (activeTimeRange) {
-      const [start, end] = activeTimeRange;
-      fn = fn.filter(n => {
-        const y = new Date(n.foundedAt).getFullYear();
-        return y >= start && y <= end;
-      });
-    }
-    
-    if (activeRelationFilter) {
-      fe = fe.filter(e => e.relationType === activeRelationFilter);
-      const connected = new Set<string>();
-      fe.forEach(e => { connected.add(e.sourceId); connected.add(e.targetId); });
-      fn = fn.filter(n => connected.has(n.id));
-    }
-
-    if (!activeRelationFilter) {
-      const fnIds = new Set(fn.map(n => n.id));
-      fe = edges.filter(e => fnIds.has(e.sourceId) && fnIds.has(e.targetId));
-    }
-    
-    set({ filteredNodes: fn, filteredEdges: fe });
+    set(applyGraphFilters(get()));
   }
 }));
