@@ -14,18 +14,18 @@
 
 ## 当前进度
 
-- 当前章节：4. AI 占位能力。
-- 当前子任务：4.1 接入 DeepSeek OpenAI-compatible AI 服务，并保留本地 fallback（已完成，等待用户许可后继续）。
-- 当前本地提交：`接入DeepSeek占位能力`。
-- 验证状态：`npm.cmd run lint` 通过；`npm.cmd run build` 通过；`/api/health` 与 `/api/ai/insight/openai` smoke 返回 200。
-- 推送状态：第一章基线已由用户手动 `git push --force-with-lease origin main` 推送成功；本章最新本地提交以 `git log -1` 为准，推送失败原因是当前执行环境无法读取 GitHub HTTPS 用户名，错误为 `fatal: could not read Username for 'https://github.com': No such file or directory`。
+- 当前章节：2. 后端 MVP。
+- 当前子任务：2.1 新增 Express API 服务骨架和 `/api/health`（已完成，等待用户许可后继续）。
+- 当前本地提交：`9c29b8f 完善后端服务骨架`。
+- 验证状态：`npm.cmd run lint` 通过；`npm.cmd run build` 通过；`/api/health` 与 `/api/ai/fallback` smoke 返回 200。
+- 推送状态：本地提交已保留；当前执行环境无法读取 GitHub HTTPS 用户名，推送失败错误为 `fatal: could not read Username for 'https://github.com': No such file or directory`，需由用户在本机 PowerShell 执行 `git push origin main`。
 
 ## 任务清单
 
 - [x] 1. 仓库纠偏与任务清单重建
   - [x] 1.1 保护当前误串状态，确认 `openconstellation.zip` 恢复源，并恢复 OpenConstellation 前端基线。
 - [ ] 2. 后端 MVP
-  - [ ] 2.1 新增 Express API 服务骨架和 `/api/health`。
+  - [x] 2.1 新增 Express API 服务骨架和 `/api/health`。
   - [ ] 2.2 实现图谱、节点详情、搜索、时间线、技术树和路径查询 API。
   - [ ] 2.3 实现 JSON 持久化的收藏、最近查看、搜索记录和 AI 洞察状态。
   - [ ] 2.4 跑通后端 smoke 验证与前端构建。
@@ -46,7 +46,11 @@
 - `.env.example`：提供 DeepSeek OpenAI-compatible 环境变量示例，包括 `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL` 和 `DEEPSEEK_MODEL`。
 - `TASKS.md`：记录 OpenConstellation 分章执行规则、当前进度、任务清单和相关文件。
 - `package.json`：新增 `dev:api` 脚本，用于启动 Express API 服务。
-- `server/index.ts`：新增 Express API 入口，提供健康检查和 AI 能力接口。
+- `server/app.ts`：新增 Express 应用装配入口，集中挂载 API 路由和 404 响应。
+- `server/data/graphStore.ts`：新增图谱数据访问入口，为后续图谱 API 和 JSON 持久化预留服务边界。
+- `server/index.ts`：整理为 Express API 启动入口，只负责读取端口并启动服务。
+- `server/routes/ai.ts`：拆分 AI 能力路由，继续提供 DeepSeek 与本地 fallback 接口。
+- `server/routes/health.ts`：新增健康检查路由，返回服务、运行时和 AI provider 状态。
 - `server/services/deepseek.ts`：新增 DeepSeek OpenAI-compatible Chat Completions 封装和本地 fallback。
 - `src/components/FilterPanel.tsx`：修复恢复基线中的路径选择状态调用，确保 TypeScript 验证通过。
 - `src/`：从 `openconstellation.zip` 恢复 OpenConstellation 前端基线、星图组件、页面组件、状态与 mock 数据。
