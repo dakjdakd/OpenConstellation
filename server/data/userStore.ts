@@ -1,7 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { AiResult } from '../services/deepseek.ts';
+import { createJsonFileStore, type JsonFileMeta } from './jsonFileStore.ts';
 
 export interface CollectionRecord {
   id: string;
@@ -21,6 +21,15 @@ export interface UserConstellation {
   aiInsights: Record<string, AiResult>;
 }
 
+export interface PruneStaleNodeReferencesResult {
+  constellation: UserConstellation;
+  removed: {
+    favorites: string[];
+    recentViews: string[];
+    collections: Array<{ collectionId: string; nodeId: string }>;
+  };
+}
+
 export interface UserStore {
   getConstellation(): UserConstellation;
   addFavorite(nodeId: string): UserConstellation;
@@ -35,6 +44,8 @@ export interface UserStore {
   clearSearchHistory(): UserConstellation;
   cacheAiInsight(key: string, insight: AiResult): UserConstellation;
   getAiInsight(key: string): AiResult | undefined;
+  pruneStaleNodeReferences(validNodeIds: Set<string> | string[], options?: { dryRun?: boolean }): PruneStaleNodeReferencesResult;
+  getMeta(): JsonFileMeta;
 }
 
 const DEFAULT_STATE: UserConstellation = {
@@ -49,33 +60,18 @@ const DEFAULT_STATE: UserConstellation = {
 };
 
 export function createUserStore(filePath = join(process.cwd(), 'server', 'data', 'user-state.json')): UserStore {
-  ensureStateFile(filePath);
-
-  function readState() {
-    try {
-      const parsed = JSON.parse(readFileSync(filePath, 'utf8')) as Partial<UserConstellation>;
-      return normalizeState(parsed);
-    } catch {
-      writeState(DEFAULT_STATE);
-      return structuredClone(DEFAULT_STATE);
-    }
-  }
-
-  function writeState(state: UserConstellation) {
-    mkdirSync(dirname(filePath), { recursive: true });
-    const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-    writeFileSync(tempPath, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
-    renameSync(tempPath, filePath);
-  }
+  const store = createJsonFileStore({
+    filePath,
+    defaultValue: DEFAULT_STATE,
+    normalize: normalizeState,
+  });
 
   function update(mutator: (state: UserConstellation) => UserConstellation) {
-    const next = mutator(readState());
-    writeState(next);
-    return next;
+    return store.update(mutator);
   }
 
   return {
-    getConstellation: readState,
+    getConstellation: store.read,
     addFavorite(nodeId) {
       return update((state) => ({
         ...state,
@@ -101,7 +97,7 @@ export function createUserStore(filePath = join(process.cwd(), 'server', 'data',
       }));
     },
     addNodeToCollection(collectionId, nodeId) {
-      const state = readState();
+      const state = store.read();
       if (!state.collections.some((collection) => collection.id === collectionId)) return null;
       const next = {
         ...state,
@@ -115,11 +111,11 @@ export function createUserStore(filePath = join(process.cwd(), 'server', 'data',
             : collection,
         ),
       };
-      writeState(next);
+      store.write(next);
       return next;
     },
     removeNodeFromCollection(collectionId, nodeId) {
-      const state = readState();
+      const state = store.read();
       if (!state.collections.some((collection) => collection.id === collectionId)) return null;
       const next = {
         ...state,
@@ -133,7 +129,7 @@ export function createUserStore(filePath = join(process.cwd(), 'server', 'data',
             : collection,
         ),
       };
-      writeState(next);
+      store.write(next);
       return next;
     },
     addRecentView(nodeId) {
@@ -150,7 +146,7 @@ export function createUserStore(filePath = join(process.cwd(), 'server', 'data',
     },
     addSearchHistory(query) {
       const cleaned = query.trim();
-      if (!cleaned) return readState();
+      if (!cleaned) return store.read();
       return update((state) => ({
         ...state,
         searchHistory: unique([cleaned, ...state.searchHistory]).slice(0, 10),
@@ -172,15 +168,55 @@ export function createUserStore(filePath = join(process.cwd(), 'server', 'data',
       }));
     },
     getAiInsight(key) {
-      return readState().aiInsights[key];
+      return store.read().aiInsights[key];
+    },
+    pruneStaleNodeReferences(validNodeIds, options = {}) {
+      const validIds = validNodeIds instanceof Set ? validNodeIds : new Set(validNodeIds);
+      const state = store.read();
+      const next = pruneState(state, validIds);
+      if (!options.dryRun && hasRemovedReferences(next.removed)) {
+        store.write(next.constellation);
+      }
+      return next;
+    },
+    getMeta: store.getMeta,
+  };
+}
+
+function pruneState(state: UserConstellation, validNodeIds: Set<string>): PruneStaleNodeReferencesResult {
+  const removedFavorites = state.favorites.filter((nodeId) => !validNodeIds.has(nodeId));
+  const removedRecentViews = state.recentViews.filter((nodeId) => !validNodeIds.has(nodeId));
+  const removedCollectionNodes = state.collections.flatMap((collection) =>
+    collection.nodes
+      .filter((nodeId) => !validNodeIds.has(nodeId))
+      .map((nodeId) => ({ collectionId: collection.id, nodeId })),
+  );
+  const now = new Date().toISOString();
+
+  return {
+    constellation: {
+      ...state,
+      favorites: state.favorites.filter((nodeId) => validNodeIds.has(nodeId)),
+      recentViews: state.recentViews.filter((nodeId) => validNodeIds.has(nodeId)),
+      collections: state.collections.map((collection) => {
+        const nodes = collection.nodes.filter((nodeId) => validNodeIds.has(nodeId));
+        return {
+          ...collection,
+          nodes,
+          updatedAt: nodes.length === collection.nodes.length ? collection.updatedAt : now,
+        };
+      }),
+    },
+    removed: {
+      favorites: removedFavorites,
+      recentViews: removedRecentViews,
+      collections: removedCollectionNodes,
     },
   };
 }
 
-function ensureStateFile(filePath: string) {
-  if (existsSync(filePath)) return;
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(DEFAULT_STATE, null, 2)}\n`, 'utf8');
+function hasRemovedReferences(removed: PruneStaleNodeReferencesResult['removed']) {
+  return removed.favorites.length > 0 || removed.recentViews.length > 0 || removed.collections.length > 0;
 }
 
 function normalizeState(value: Partial<UserConstellation>): UserConstellation {

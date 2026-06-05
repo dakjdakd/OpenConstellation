@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import type { GraphData, GraphEdge, GraphNode } from '../../src/types.ts';
+import { createJsonFileStore, type JsonFileMeta } from './jsonFileStore.ts';
 
 export interface GraphStore {
   getGraph(): GraphData;
@@ -9,6 +9,7 @@ export interface GraphStore {
   removeNode(nodeId: string): GraphData;
   upsertEdge(edge: GraphEdge): GraphData;
   removeEdge(edgeId: string): GraphData;
+  getMeta(): JsonFileMeta;
 }
 
 const DEFAULT_GRAPH: GraphData = {
@@ -17,67 +18,47 @@ const DEFAULT_GRAPH: GraphData = {
 };
 
 export function createGraphStore(filePath = join(process.cwd(), 'server', 'data', 'graph-data.json')): GraphStore {
-  ensureGraphFile(filePath);
-
-  function readGraph() {
-    try {
-      const parsed = JSON.parse(readFileSync(filePath, 'utf8')) as Partial<GraphData>;
-      return normalizeGraph(parsed);
-    } catch {
-      writeGraph(DEFAULT_GRAPH);
-      return structuredClone(DEFAULT_GRAPH);
-    }
-  }
-
-  function writeGraph(graph: GraphData) {
-    const normalized = normalizeGraph(graph);
-    mkdirSync(dirname(filePath), { recursive: true });
-    const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-    writeFileSync(tempPath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
-    renameSync(tempPath, filePath);
-    return normalized;
-  }
+  const store = createJsonFileStore({
+    filePath,
+    defaultValue: DEFAULT_GRAPH,
+    normalize: normalizeGraph,
+  });
 
   return {
-    getGraph: readGraph,
-    saveGraph: writeGraph,
+    getGraph: store.read,
+    saveGraph: store.write,
     upsertNode(node) {
-      const graph = readGraph();
-      const exists = graph.nodes.some((item) => item.id === node.id);
-      return writeGraph({
+      return store.update((graph) => {
+        const exists = graph.nodes.some((item) => item.id === node.id);
+        return {
         nodes: exists ? graph.nodes.map((item) => (item.id === node.id ? node : item)) : [...graph.nodes, node],
         edges: graph.edges,
+        };
       });
     },
     removeNode(nodeId) {
-      const graph = readGraph();
-      return writeGraph({
+      return store.update((graph) => ({
         nodes: graph.nodes.filter((node) => node.id !== nodeId),
         edges: graph.edges.filter((edge) => edge.sourceId !== nodeId && edge.targetId !== nodeId),
-      });
+      }));
     },
     upsertEdge(edge) {
-      const graph = readGraph();
-      const exists = graph.edges.some((item) => item.id === edge.id);
-      return writeGraph({
+      return store.update((graph) => {
+        const exists = graph.edges.some((item) => item.id === edge.id);
+        return {
         nodes: graph.nodes,
         edges: exists ? graph.edges.map((item) => (item.id === edge.id ? edge : item)) : [...graph.edges, edge],
+        };
       });
     },
     removeEdge(edgeId) {
-      const graph = readGraph();
-      return writeGraph({
+      return store.update((graph) => ({
         nodes: graph.nodes,
         edges: graph.edges.filter((edge) => edge.id !== edgeId),
-      });
+      }));
     },
+    getMeta: store.getMeta,
   };
-}
-
-function ensureGraphFile(filePath: string) {
-  if (existsSync(filePath)) return;
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(DEFAULT_GRAPH, null, 2)}\n`, 'utf8');
 }
 
 function normalizeGraph(value: Partial<GraphData>): GraphData {

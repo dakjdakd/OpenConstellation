@@ -32,6 +32,58 @@ export interface TechTreeTier {
   nodes: Array<Pick<GraphNode, 'id' | 'name' | 'type' | 'subtitle' | 'description' | 'tags'>>;
 }
 
+export type SearchSort = 'relevance' | 'popularity' | 'name' | 'recent';
+
+export interface SearchOptions {
+  query: string;
+  type?: string;
+  tag?: string;
+  status?: string;
+  sort?: SearchSort;
+  limit?: number;
+}
+
+export interface SearchFacet {
+  value: string;
+  count: number;
+}
+
+export interface SearchPayload {
+  query: string;
+  items: GraphNode[];
+  total: number;
+  facets: {
+    types: SearchFacet[];
+    tags: SearchFacet[];
+    statuses: SearchFacet[];
+  };
+  suggestions: Array<Pick<GraphNode, 'id' | 'name' | 'type' | 'subtitle' | 'tags'>>;
+  filters: {
+    type?: string;
+    tag?: string;
+    status?: string;
+    sort: SearchSort;
+    limit?: number;
+  };
+}
+
+export interface RelationshipExplorerOptions {
+  nodeId: string;
+  hops?: number;
+  relationType?: string;
+}
+
+export interface RelationshipExplorerResult {
+  nodeId: string;
+  found: boolean;
+  center?: GraphNode;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  layers: Array<{ depth: number; nodes: GraphNode[] }>;
+  relationCounts: SearchFacet[];
+  explanation: string;
+}
+
 export function filterGraph(
   graph: GraphData,
   filters: {
@@ -102,17 +154,47 @@ export function getNodeDetail(graph: GraphData, nodeId: string, aiInsight?: AiRe
 }
 
 export function searchNodes(graph: GraphData, query: string) {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return [];
+  return searchGraph(graph, { query }).items;
+}
 
-  return graph.nodes
+export function searchGraph(graph: GraphData, options: SearchOptions): SearchPayload {
+  const query = options.query.trim();
+  const normalized = query.toLowerCase();
+  const sort = normalizeSearchSort(options.sort);
+  const scoredNodes = graph.nodes
     .map((node) => ({
       node,
-      score: scoreNode(node, normalized),
+      score: normalized ? scoreNode(node, normalized) : 1,
     }))
-    .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score || b.node.popularity - a.node.popularity)
-    .map((item) => item.node);
+    .filter((item) => !normalized || item.score > 0);
+
+  const filtered = scoredNodes.filter(({ node }) => {
+    if (options.type && node.type !== options.type) return false;
+    if (options.status && node.status !== options.status) return false;
+    if (options.tag) {
+      const tag = options.tag.toLowerCase();
+      if (!node.tags.some((item) => item.toLowerCase() === tag)) return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => compareSearchResults(a, b, sort));
+  const limited = typeof options.limit === 'number' ? sorted.slice(0, Math.max(0, options.limit)) : sorted;
+
+  return {
+    query,
+    items: limited.map((item) => item.node),
+    total: filtered.length,
+    facets: buildSearchFacets(scoredNodes.map((item) => item.node)),
+    suggestions: buildSearchSuggestions(graph, query, filtered.map((item) => item.node)),
+    filters: {
+      ...(options.type ? { type: options.type } : {}),
+      ...(options.tag ? { tag: options.tag } : {}),
+      ...(options.status ? { status: options.status } : {}),
+      sort,
+      ...(typeof options.limit === 'number' ? { limit: options.limit } : {}),
+    },
+  };
 }
 
 export function buildTimeline(
@@ -228,6 +310,71 @@ export function findShortestPath(graph: GraphData, from: string, to: string): Pa
   };
 }
 
+export function exploreRelationships(graph: GraphData, options: RelationshipExplorerOptions): RelationshipExplorerResult {
+  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
+  const center = nodeById.get(options.nodeId);
+  const hops = Math.max(1, Math.min(3, Math.floor(options.hops ?? 2)));
+
+  if (!center) {
+    return {
+      nodeId: options.nodeId,
+      found: false,
+      nodes: [],
+      edges: [],
+      layers: [],
+      relationCounts: [],
+      explanation: 'The requested center node does not exist in the current graph.',
+    };
+  }
+
+  const allowedEdges = options.relationType
+    ? graph.edges.filter((edge) => edge.relationType === options.relationType)
+    : graph.edges;
+  const adjacency = new Map<string, GraphEdge[]>();
+  allowedEdges.forEach((edge) => {
+    adjacency.set(edge.sourceId, [...(adjacency.get(edge.sourceId) ?? []), edge]);
+    adjacency.set(edge.targetId, [...(adjacency.get(edge.targetId) ?? []), edge]);
+  });
+
+  const depths = new Map<string, number>([[center.id, 0]]);
+  const edgeIds = new Set<string>();
+  const queue = [center.id];
+
+  while (queue.length) {
+    const currentId = queue.shift()!;
+    const currentDepth = depths.get(currentId) ?? 0;
+    if (currentDepth >= hops) continue;
+
+    for (const edge of adjacency.get(currentId) ?? []) {
+      const neighborId = edge.sourceId === currentId ? edge.targetId : edge.sourceId;
+      if (!nodeById.has(neighborId)) continue;
+      edgeIds.add(edge.id);
+      if (depths.has(neighborId)) continue;
+      depths.set(neighborId, currentDepth + 1);
+      queue.push(neighborId);
+    }
+  }
+
+  const nodeIds = new Set(depths.keys());
+  const nodes = graph.nodes.filter((node) => nodeIds.has(node.id));
+  const edges = allowedEdges.filter((edge) => edgeIds.has(edge.id) && nodeIds.has(edge.sourceId) && nodeIds.has(edge.targetId));
+  const layers = Array.from({ length: hops + 1 }, (_item, depth) => ({
+    depth,
+    nodes: nodes.filter((node) => depths.get(node.id) === depth).sort((a, b) => b.popularity - a.popularity || a.name.localeCompare(b.name)),
+  })).filter((layer) => layer.nodes.length > 0);
+
+  return {
+    nodeId: center.id,
+    found: true,
+    center,
+    nodes,
+    edges,
+    layers,
+    relationCounts: countFacet(edges.map((edge) => edge.relationType)),
+    explanation: `${center.name} relationship explorer returned ${nodes.length} nodes and ${edges.length} edges within ${hops} hop${hops > 1 ? 's' : ''}.`,
+  };
+}
+
 function scoreNode(node: GraphNode, query: string) {
   let score = 0;
   const name = node.name.toLowerCase();
@@ -238,6 +385,77 @@ function scoreNode(node: GraphNode, query: string) {
   if (node.description.toLowerCase().includes(query)) score += 12;
   score += node.tags.filter((tag) => tag.toLowerCase().includes(query)).length * 16;
   return score;
+}
+
+function normalizeSearchSort(sort: SearchOptions['sort']): SearchSort {
+  return sort === 'popularity' || sort === 'name' || sort === 'recent' ? sort : 'relevance';
+}
+
+function compareSearchResults(
+  a: { node: GraphNode; score: number },
+  b: { node: GraphNode; score: number },
+  sort: SearchSort,
+) {
+  if (sort === 'popularity') return b.node.popularity - a.node.popularity || a.node.name.localeCompare(b.node.name);
+  if (sort === 'name') return a.node.name.localeCompare(b.node.name);
+  if (sort === 'recent') return latestNodeYear(b.node) - latestNodeYear(a.node) || b.node.popularity - a.node.popularity;
+  return b.score - a.score || b.node.popularity - a.node.popularity || a.node.name.localeCompare(b.node.name);
+}
+
+function latestNodeYear(node: GraphNode) {
+  const years = [
+    node.foundedAt ? new Date(node.foundedAt).getFullYear() : Number.NEGATIVE_INFINITY,
+    ...(node.events ?? []).map((event) => new Date(event.date).getFullYear()),
+  ].filter(Number.isFinite);
+  return years.length ? Math.max(...years) : Number.NEGATIVE_INFINITY;
+}
+
+function buildSearchFacets(nodes: GraphNode[]): SearchPayload['facets'] {
+  return {
+    types: countFacet(nodes.map((node) => node.type)),
+    tags: countFacet(nodes.flatMap((node) => node.tags)).slice(0, 24),
+    statuses: countFacet(nodes.map((node) => node.status)),
+  };
+}
+
+function countFacet(values: string[]): SearchFacet[] {
+  const counts = new Map<string, number>();
+  values.filter(Boolean).forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+  return [...counts.entries()]
+    .map(([value, count]) => ({ value, count }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+}
+
+function buildSearchSuggestions(
+  graph: GraphData,
+  query: string,
+  filteredItems: GraphNode[],
+): SearchPayload['suggestions'] {
+  const normalized = query.toLowerCase();
+  const base = normalized
+    ? graph.nodes
+        .filter((node) => !filteredItems.some((item) => item.id === node.id))
+        .map((node) => ({ node, score: scoreSuggestion(node, normalized) }))
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score || b.node.popularity - a.node.popularity)
+        .map((item) => item.node)
+    : [...graph.nodes].sort((a, b) => b.popularity - a.popularity);
+
+  return base.slice(0, 8).map((node) => ({
+    id: node.id,
+    name: node.name,
+    type: node.type,
+    subtitle: node.subtitle,
+    tags: node.tags,
+  }));
+}
+
+function scoreSuggestion(node: GraphNode, query: string) {
+  const haystack = [node.name, node.type, node.subtitle, node.description, ...node.tags, ...(node.relatedTechnology ?? [])]
+    .join(' ')
+    .toLowerCase();
+  const tokens = query.split(/\s+/).filter(Boolean);
+  return tokens.reduce((sum, token) => sum + (haystack.includes(token) ? 10 : 0), 0) + (node.name.toLowerCase().startsWith(query[0] ?? '') ? 2 : 0);
 }
 
 function toTechNodes(nodes: GraphNode[]) {

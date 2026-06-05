@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { createJsonFileStore, type JsonFileMeta } from './jsonFileStore.ts';
 
 export type OverrideEntityType = 'node' | 'edge' | 'event' | 'source';
 
@@ -26,6 +26,7 @@ export interface OverrideStore {
   getOverrides(filters?: Partial<Pick<OverrideRecord, 'entityType' | 'entityId' | 'field'>>): OverrideRecord[];
   addOverride(input: Omit<OverrideRecord, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): OverrideRecord;
   addOverrides(records: Array<Omit<OverrideRecord, 'id' | 'createdAt'> & { id?: string; createdAt?: string }>): OverrideRecord[];
+  getMeta(): JsonFileMeta;
 }
 
 const DEFAULT_STATE: OverrideState = {
@@ -33,25 +34,11 @@ const DEFAULT_STATE: OverrideState = {
 };
 
 export function createOverrideStore(filePath = join(process.cwd(), 'server', 'data', 'override-store.json')): OverrideStore {
-  ensureOverrideFile(filePath);
-
-  function readState() {
-    try {
-      return normalizeOverrideState(JSON.parse(readFileSync(filePath, 'utf8')));
-    } catch {
-      writeState(DEFAULT_STATE);
-      return structuredClone(DEFAULT_STATE);
-    }
-  }
-
-  function writeState(state: OverrideState) {
-    const normalized = normalizeOverrideState(state);
-    mkdirSync(dirname(filePath), { recursive: true });
-    const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-    writeFileSync(tempPath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
-    renameSync(tempPath, filePath);
-    return normalized;
-  }
+  const store = createJsonFileStore({
+    filePath,
+    defaultValue: DEFAULT_STATE,
+    normalize: normalizeOverrideState,
+  });
 
   function makeRecord(input: Omit<OverrideRecord, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): OverrideRecord {
     return {
@@ -71,7 +58,7 @@ export function createOverrideStore(filePath = join(process.cwd(), 'server', 'da
 
   return {
     getOverrides(filters = {}) {
-      return readState().overrides.filter((record) =>
+      return store.read().overrides.filter((record) =>
         (!filters.entityType || record.entityType === filters.entityType) &&
         (!filters.entityId || record.entityId === filters.entityId) &&
         (!filters.field || record.field === filters.field),
@@ -81,21 +68,15 @@ export function createOverrideStore(filePath = join(process.cwd(), 'server', 'da
       return this.addOverrides([input])[0];
     },
     addOverrides(records) {
-      const state = readState();
       const nextRecords = records.map(makeRecord).filter((record) => record.entityType && record.entityId && record.field);
-      const nextState = writeState({
+      const nextState = store.update((state) => ({
         ...state,
         overrides: [...nextRecords, ...state.overrides].slice(0, 1000),
-      });
+      }));
       return nextState.overrides.slice(0, nextRecords.length);
     },
+    getMeta: store.getMeta,
   };
-}
-
-function ensureOverrideFile(filePath: string) {
-  if (existsSync(filePath)) return;
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(DEFAULT_STATE, null, 2)}\n`, 'utf8');
 }
 
 function normalizeOverrideState(value: unknown): OverrideState {

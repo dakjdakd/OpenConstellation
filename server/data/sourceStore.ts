@@ -1,7 +1,7 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { GraphData, GraphEdge, GraphNode } from '../../src/types.ts';
+import { createJsonFileStore, type JsonFileMeta } from './jsonFileStore.ts';
 
 export type SourceKind = 'official' | 'github' | 'paper' | 'wiki' | 'news' | 'manual' | 'api';
 export type TrustLevel = 'primary' | 'secondary' | 'community' | 'unverified';
@@ -55,6 +55,7 @@ export interface SourceStore {
   getImportBatch(batchId: string): ImportBatch | undefined;
   updateImportBatch(batchId: string, patch: Partial<Pick<ImportBatch, 'status' | 'reviewedAt' | 'reviewedBy' | 'notes'>>): ImportBatch | undefined;
   approveImportBatch(batchId: string, graph: GraphData): { batch: ImportBatch; graph: GraphData } | { error: string };
+  getMeta(): JsonFileMeta;
 }
 
 const DEFAULT_STATE: SourceState = {
@@ -63,36 +64,23 @@ const DEFAULT_STATE: SourceState = {
 };
 
 export function createSourceStore(filePath = join(process.cwd(), 'server', 'data', 'source-store.json')): SourceStore {
-  ensureSourceFile(filePath);
-
-  function readState() {
-    try {
-      return normalizeSourceState(JSON.parse(readFileSync(filePath, 'utf8')));
-    } catch {
-      writeState(DEFAULT_STATE);
-      return structuredClone(DEFAULT_STATE);
-    }
-  }
-
-  function writeState(state: SourceState) {
-    const normalized = normalizeSourceState(state);
-    mkdirSync(dirname(filePath), { recursive: true });
-    const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-    writeFileSync(tempPath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
-    renameSync(tempPath, filePath);
-    return normalized;
-  }
+  const store = createJsonFileStore({
+    filePath,
+    defaultValue: DEFAULT_STATE,
+    normalize: normalizeSourceState,
+  });
 
   function upsertSources(sources: SourceRecord[]) {
-    const state = readState();
-    const byId = new Map(state.sources.map((source) => [source.id, source]));
-    sources.forEach((source) => byId.set(source.id, source));
-    return writeState({ ...state, sources: [...byId.values()].sort((a, b) => a.title.localeCompare(b.title)) });
+    return store.update((state) => {
+      const byId = new Map(state.sources.map((source) => [source.id, source]));
+      sources.forEach((source) => byId.set(source.id, source));
+      return { ...state, sources: [...byId.values()].sort((a, b) => a.title.localeCompare(b.title)) };
+    });
   }
 
   return {
     getSources(graph) {
-      const state = readState();
+      const state = store.read();
       const inferred = graph ? inferSourcesFromGraph(graph, state.sources) : [];
       if (!inferred.length) return state.sources;
       return upsertSources(inferred).sources;
@@ -101,8 +89,7 @@ export function createSourceStore(filePath = join(process.cwd(), 'server', 'data
       return upsertSources([source]).sources.find((item) => item.id === source.id) ?? source;
     },
     removeSource(sourceId) {
-      const state = readState();
-      writeState({ ...state, sources: state.sources.filter((source) => source.id !== sourceId) });
+      store.update((state) => ({ ...state, sources: state.sources.filter((source) => source.id !== sourceId) }));
       return { removed: true };
     },
     createImportBatch(input) {
@@ -117,31 +104,30 @@ export function createSourceStore(filePath = join(process.cwd(), 'server', 'data
           warnings: input.summary?.warnings ?? [],
         },
       };
-      const state = readState();
-      writeState({ ...state, importBatches: [batch, ...state.importBatches].slice(0, 100) });
+      store.update((state) => ({ ...state, importBatches: [batch, ...state.importBatches].slice(0, 100) }));
       upsertSources(input.sources);
       return batch;
     },
     getImportBatches(status) {
-      const batches = readState().importBatches;
+      const batches = store.read().importBatches;
       return status ? batches.filter((batch) => batch.status === status) : batches;
     },
     getImportBatch(batchId) {
-      return readState().importBatches.find((batch) => batch.id === batchId);
+      return store.read().importBatches.find((batch) => batch.id === batchId);
     },
     updateImportBatch(batchId, patch) {
-      const state = readState();
+      const state = store.read();
       const batch = state.importBatches.find((item) => item.id === batchId);
       if (!batch) return undefined;
       const nextBatch = { ...batch, ...patch };
-      writeState({
+      store.write({
         ...state,
         importBatches: state.importBatches.map((item) => (item.id === batchId ? nextBatch : item)),
       });
       return nextBatch;
     },
     approveImportBatch(batchId, graph) {
-      const state = readState();
+      const state = store.read();
       const batch = state.importBatches.find((item) => item.id === batchId);
       if (!batch) return { error: 'import_batch_not_found' };
       if (batch.status === 'rejected') return { error: 'import_batch_rejected' };
@@ -151,13 +137,14 @@ export function createSourceStore(filePath = join(process.cwd(), 'server', 'data
       const approvedBatch = { ...batch, status: 'approved' as const, reviewedAt };
       const sources = batch.sources.map((source) => ({ ...source, reviewStatus: 'approved' as const }));
 
-      writeState({
+      store.write({
         sources: mergeSources(state.sources, sources),
         importBatches: state.importBatches.map((item) => (item.id === batchId ? approvedBatch : item)),
       });
 
       return { batch: approvedBatch, graph: nextGraph };
     },
+    getMeta: store.getMeta,
   };
 }
 
@@ -186,12 +173,6 @@ export function makeSourceRecord(input: {
     ...(input.notes ? { notes: input.notes.trim() } : {}),
     ...(input.metadata ? { metadata: input.metadata } : {}),
   };
-}
-
-function ensureSourceFile(filePath: string) {
-  if (existsSync(filePath)) return;
-  mkdirSync(dirname(filePath), { recursive: true });
-  writeFileSync(filePath, `${JSON.stringify(DEFAULT_STATE, null, 2)}\n`, 'utf8');
 }
 
 function normalizeSourceState(value: unknown): SourceState {

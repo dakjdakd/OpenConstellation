@@ -25,6 +25,19 @@ export interface SearchResponse {
   query: string;
   items: GraphNode[];
   total: number;
+  facets?: {
+    types: Array<{ value: string; count: number }>;
+    tags: Array<{ value: string; count: number }>;
+    statuses: Array<{ value: string; count: number }>;
+  };
+  suggestions?: Array<Pick<GraphNode, 'id' | 'name' | 'type' | 'subtitle' | 'tags'>>;
+  filters?: {
+    type?: string;
+    tag?: string;
+    status?: string;
+    sort: 'relevance' | 'popularity' | 'name' | 'recent';
+    limit?: number;
+  };
   aiInterpretation?: AiResult;
 }
 
@@ -44,6 +57,17 @@ export interface TechTreeResponse {
     name: string;
     nodes: Array<Pick<GraphNode, 'id' | 'name' | 'type' | 'subtitle' | 'description' | 'tags'>>;
   }>;
+}
+
+export interface RelationshipExplorerResponse {
+  nodeId: string;
+  found: boolean;
+  center?: GraphNode;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  layers: Array<{ depth: number; nodes: GraphNode[] }>;
+  relationCounts: Array<{ value: string; count: number }>;
+  explanation: string;
 }
 
 export interface CollectionRecord {
@@ -222,6 +246,16 @@ export async function fetchTechTree(): Promise<TechTreeResponse> {
       },
     ],
   });
+}
+
+export async function fetchRelationshipExplorer(
+  nodeId: string,
+  options: { hops?: number; relationType?: string } = {},
+): Promise<RelationshipExplorerResponse> {
+  const params = new URLSearchParams({ nodeId });
+  if (typeof options.hops === 'number') params.set('hops', String(options.hops));
+  if (options.relationType) params.set('relationType', options.relationType);
+  return requestJson<RelationshipExplorerResponse>(`/api/graph/relationships?${params.toString()}`);
 }
 
 export async function fetchAiLearningPath(nodeId: string) {

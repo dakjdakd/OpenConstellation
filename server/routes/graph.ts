@@ -8,10 +8,13 @@ import type { GraphEdge, GraphNode, NodeType, RelationType } from '../../src/typ
 import {
   buildTechTree,
   buildTimeline,
+  exploreRelationships,
   filterGraph,
   findShortestPath,
   getNodeDetail,
+  searchGraph,
   searchNodes,
+  type SearchSort,
 } from '../graphService.ts';
 import { generateAiResult, generateStructuredNodeDraft, shouldUseCachedAiResult } from '../services/deepseek.ts';
 
@@ -550,6 +553,22 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
     res.json(findShortestPath(graphStore.getGraph(), from, to));
   });
 
+  router.get('/graph/relationships', (req, res) => {
+    const nodeId = asString(req.query.nodeId || req.query.center || req.query.id);
+    if (!nodeId) {
+      res.status(400).json({ error: 'node_id_required' });
+      return;
+    }
+
+    const result = exploreRelationships(graphStore.getGraph(), {
+      nodeId,
+      hops: asBoundedNumber(req.query.hops, 1, 3),
+      relationType: asString(req.query.relationType),
+    });
+
+    res.status(result.found ? 200 : 404).json(result);
+  });
+
   router.get('/graph', (req, res) => {
     res.json(
       filterGraph(graphStore.getGraph(), {
@@ -600,7 +619,15 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
   router.get('/search', async (req, res) => {
     const query = asString(req.query.q).trim();
     const graph = graphStore.getGraph();
-    const items = searchNodes(graph, query);
+    const searchResult = searchGraph(graph, {
+      query,
+      type: asString(req.query.type),
+      tag: asString(req.query.tag),
+      status: asString(req.query.status),
+      sort: parseSearchSort(req.query.sort),
+      limit: asBoundedNumber(req.query.limit, 1, 100),
+    });
+    const items = searchResult.items;
 
     if (query) userStore.addSearchHistory(query);
 
@@ -629,9 +656,7 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
     if (query && aiInterpretation && !shouldUseCachedAiResult(cached)) userStore.cacheAiInsight(cacheKey, aiInterpretation);
 
     res.json({
-      query,
-      items,
-      total: items.length,
+      ...searchResult,
       aiInterpretation,
     });
   });
@@ -664,6 +689,16 @@ function asNumber(value: unknown) {
   if (typeof value !== 'string' || !value.trim()) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function asBoundedNumber(value: unknown, min: number, max: number) {
+  const parsed = asNumber(value);
+  if (typeof parsed !== 'number') return undefined;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
+}
+
+function parseSearchSort(value: unknown): SearchSort | undefined {
+  return value === 'relevance' || value === 'popularity' || value === 'name' || value === 'recent' ? value : undefined;
 }
 
 const NODE_TYPES = new Set<NodeType>([
