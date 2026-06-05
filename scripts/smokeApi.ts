@@ -22,19 +22,6 @@ try {
   );
   await checkJson('/api/timeline', (data) => Array.isArray(data.items) && data.items.length > 0);
   await checkJson('/api/tech-tree', (data) => Array.isArray(data.tiers) && data.tiers.length > 0);
-  await checkJson(
-    '/api/graph/path?from=openai&to=cursor',
-    (data) => data.found === true && Array.isArray(data.nodes) && data.nodes.some((node: any) => node.id === 'openai') && data.nodes.some((node: any) => node.id === 'cursor'),
-  );
-  await checkJson(
-    '/api/graph/relationships?nodeId=openai&hops=2',
-    (data) =>
-      data.found === true &&
-      data.center?.id === 'openai' &&
-      Array.isArray(data.layers) &&
-      data.layers.some((layer: any) => layer.depth === 1) &&
-      Array.isArray(data.relationCounts),
-  );
   await checkJson('/api/admin/data-health', (data) => data.ok === true && data.counts?.nodes >= 50);
   await checkJson('/api/admin/user-state/prune-stale-node-references?dryRun=true', (data) => data.dryRun === true && data.removed && data.dataHealth?.ok === true, {
     method: 'POST',

@@ -8,9 +8,7 @@ import type { GraphEdge, GraphNode, NodeType, RelationType } from '../../src/typ
 import {
   buildTechTree,
   buildTimeline,
-  exploreRelationships,
   filterGraph,
-  findShortestPath,
   getNodeDetail,
   searchGraph,
   searchNodes,
@@ -545,28 +543,6 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
     const saved = graphStore.upsertEdge(nextEdge);
     recordOverrides(overrideStore, 'edge', req.params.id, edge, nextEdge, req.body, ['sourceList']);
     res.json(saved);
-  });
-
-  router.get('/graph/path', (req, res) => {
-    const from = asString(req.query.from);
-    const to = asString(req.query.to);
-    res.json(findShortestPath(graphStore.getGraph(), from, to));
-  });
-
-  router.get('/graph/relationships', (req, res) => {
-    const nodeId = asString(req.query.nodeId || req.query.center || req.query.id);
-    if (!nodeId) {
-      res.status(400).json({ error: 'node_id_required' });
-      return;
-    }
-
-    const result = exploreRelationships(graphStore.getGraph(), {
-      nodeId,
-      hops: asBoundedNumber(req.query.hops, 1, 3),
-      relationType: asString(req.query.relationType),
-    });
-
-    res.status(result.found ? 200 : 404).json(result);
   });
 
   router.get('/graph', (req, res) => {

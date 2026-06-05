@@ -17,15 +17,6 @@ export interface TimelineEvent {
   node: Pick<GraphNode, 'id' | 'name' | 'type' | 'tags'>;
 }
 
-export interface PathResult {
-  from: string;
-  to: string;
-  found: boolean;
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-  explanation: string;
-}
-
 export interface TechTreeTier {
   id: string;
   name: string;
@@ -65,23 +56,6 @@ export interface SearchPayload {
     sort: SearchSort;
     limit?: number;
   };
-}
-
-export interface RelationshipExplorerOptions {
-  nodeId: string;
-  hops?: number;
-  relationType?: string;
-}
-
-export interface RelationshipExplorerResult {
-  nodeId: string;
-  found: boolean;
-  center?: GraphNode;
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-  layers: Array<{ depth: number; nodes: GraphNode[] }>;
-  relationCounts: SearchFacet[];
-  explanation: string;
 }
 
 export function filterGraph(
@@ -238,143 +212,6 @@ export function buildTechTree(graph: GraphData): { tiers: TechTreeTier[] } {
   };
 }
 
-export function findShortestPath(graph: GraphData, from: string, to: string): PathResult {
-  if (!from || !to) {
-    return emptyPath(from, to, 'Both from and to node ids are required.');
-  }
-
-  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
-  if (!nodeById.has(from) || !nodeById.has(to)) {
-    return emptyPath(from, to, 'One or both nodes do not exist in the constellation graph.');
-  }
-
-  if (from === to) {
-    return {
-      from,
-      to,
-      found: true,
-      nodes: [nodeById.get(from)!],
-      edges: [],
-      explanation: `${nodeById.get(from)!.name} is already the selected target node.`,
-    };
-  }
-
-  const adjacency = new Map<string, string[]>();
-  graph.edges.forEach((edge) => {
-    adjacency.set(edge.sourceId, [...(adjacency.get(edge.sourceId) ?? []), edge.targetId]);
-    adjacency.set(edge.targetId, [...(adjacency.get(edge.targetId) ?? []), edge.sourceId]);
-  });
-
-  const queue = [from];
-  const visited = new Set([from]);
-  const previous = new Map<string, string>();
-
-  while (queue.length) {
-    const current = queue.shift()!;
-    if (current === to) break;
-
-    for (const neighbor of adjacency.get(current) ?? []) {
-      if (visited.has(neighbor)) continue;
-      visited.add(neighbor);
-      previous.set(neighbor, current);
-      queue.push(neighbor);
-    }
-  }
-
-  if (!visited.has(to)) {
-    return emptyPath(from, to, 'No visible relationship path was found in the current MVP graph.');
-  }
-
-  const pathIds = [to];
-  while (pathIds[0] !== from) {
-    pathIds.unshift(previous.get(pathIds[0])!);
-  }
-
-  const pathNodes = pathIds.map((id) => nodeById.get(id)!);
-  const pathEdges = pathIds.slice(1).map((id, index) => {
-    const sourceId = pathIds[index];
-    return graph.edges.find(
-      (edge) =>
-        (edge.sourceId === sourceId && edge.targetId === id) ||
-        (edge.sourceId === id && edge.targetId === sourceId),
-    )!;
-  });
-
-  return {
-    from,
-    to,
-    found: true,
-    nodes: pathNodes,
-    edges: pathEdges,
-    explanation: pathNodes.map((node) => node.name).join(' -> '),
-  };
-}
-
-export function exploreRelationships(graph: GraphData, options: RelationshipExplorerOptions): RelationshipExplorerResult {
-  const nodeById = new Map(graph.nodes.map((node) => [node.id, node]));
-  const center = nodeById.get(options.nodeId);
-  const hops = Math.max(1, Math.min(3, Math.floor(options.hops ?? 2)));
-
-  if (!center) {
-    return {
-      nodeId: options.nodeId,
-      found: false,
-      nodes: [],
-      edges: [],
-      layers: [],
-      relationCounts: [],
-      explanation: 'The requested center node does not exist in the current graph.',
-    };
-  }
-
-  const allowedEdges = options.relationType
-    ? graph.edges.filter((edge) => edge.relationType === options.relationType)
-    : graph.edges;
-  const adjacency = new Map<string, GraphEdge[]>();
-  allowedEdges.forEach((edge) => {
-    adjacency.set(edge.sourceId, [...(adjacency.get(edge.sourceId) ?? []), edge]);
-    adjacency.set(edge.targetId, [...(adjacency.get(edge.targetId) ?? []), edge]);
-  });
-
-  const depths = new Map<string, number>([[center.id, 0]]);
-  const edgeIds = new Set<string>();
-  const queue = [center.id];
-
-  while (queue.length) {
-    const currentId = queue.shift()!;
-    const currentDepth = depths.get(currentId) ?? 0;
-    if (currentDepth >= hops) continue;
-
-    for (const edge of adjacency.get(currentId) ?? []) {
-      const neighborId = edge.sourceId === currentId ? edge.targetId : edge.sourceId;
-      if (!nodeById.has(neighborId)) continue;
-      edgeIds.add(edge.id);
-      if (depths.has(neighborId)) continue;
-      depths.set(neighborId, currentDepth + 1);
-      queue.push(neighborId);
-    }
-  }
-
-  const nodeIds = new Set(depths.keys());
-  const nodes = graph.nodes.filter((node) => nodeIds.has(node.id));
-  const edges = allowedEdges.filter((edge) => edgeIds.has(edge.id) && nodeIds.has(edge.sourceId) && nodeIds.has(edge.targetId));
-  const layers = Array.from({ length: hops + 1 }, (_item, depth) => ({
-    depth,
-    nodes: nodes.filter((node) => depths.get(node.id) === depth).sort((a, b) => b.popularity - a.popularity || a.name.localeCompare(b.name)),
-  })).filter((layer) => layer.nodes.length > 0);
-
-  return {
-    nodeId: center.id,
-    found: true,
-    center,
-    nodes,
-    edges,
-    layers,
-    relationCounts: countFacet(edges.map((edge) => edge.relationType)),
-    explanation: `${center.name} relationship explorer returned ${nodes.length} nodes and ${edges.length} edges within ${hops} hop${hops > 1 ? 's' : ''}.`,
-  };
-}
-
 function scoreNode(node: GraphNode, query: string) {
   let score = 0;
   const name = node.name.toLowerCase();
@@ -467,15 +304,4 @@ function toTechNodes(nodes: GraphNode[]) {
     description: node.description,
     tags: node.tags,
   }));
-}
-
-function emptyPath(from: string, to: string, explanation: string): PathResult {
-  return {
-    from,
-    to,
-    found: false,
-    nodes: [],
-    edges: [],
-    explanation,
-  };
 }

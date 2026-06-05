@@ -59,17 +59,6 @@ export interface TechTreeResponse {
   }>;
 }
 
-export interface RelationshipExplorerResponse {
-  nodeId: string;
-  found: boolean;
-  center?: GraphNode;
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-  layers: Array<{ depth: number; nodes: GraphNode[] }>;
-  relationCounts: Array<{ value: string; count: number }>;
-  explanation: string;
-}
-
 export interface CollectionRecord {
   id: string;
   name: string;
@@ -246,16 +235,6 @@ export async function fetchTechTree(): Promise<TechTreeResponse> {
       },
     ],
   });
-}
-
-export async function fetchRelationshipExplorer(
-  nodeId: string,
-  options: { hops?: number; relationType?: string } = {},
-): Promise<RelationshipExplorerResponse> {
-  const params = new URLSearchParams({ nodeId });
-  if (typeof options.hops === 'number') params.set('hops', String(options.hops));
-  if (options.relationType) params.set('relationType', options.relationType);
-  return requestJson<RelationshipExplorerResponse>(`/api/graph/relationships?${params.toString()}`);
 }
 
 export async function fetchAiLearningPath(nodeId: string) {
