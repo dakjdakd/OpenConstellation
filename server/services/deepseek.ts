@@ -36,6 +36,14 @@ export interface AiProviderProbe {
   providerHttpStatus?: number;
 }
 
+export interface SearchScopeResult {
+  eligible: boolean;
+  reason: 'ai_related' | 'out_of_scope' | 'provider_unavailable';
+  provider: 'deepseek' | 'heuristic' | 'fallback';
+  confidence: number;
+  message: string;
+}
+
 export interface StructuredNodeDraft {
   provider: 'deepseek' | 'fallback';
   model: string;
@@ -356,6 +364,120 @@ export async function generateStructuredNodeDraft(payload: {
   }
 }
 
+export async function classifySearchQueryScope(query: string): Promise<SearchScopeResult> {
+  const trimmed = query.trim();
+  const heuristic = classifySearchQueryScopeHeuristic(trimmed);
+  const config = getAiConfig();
+
+  if (!trimmed) {
+    return {
+      eligible: false,
+      reason: 'out_of_scope',
+      provider: 'heuristic',
+      confidence: 1,
+      message: 'Search query is empty.',
+    };
+  }
+
+  if (!config.apiKey) {
+    if (!heuristic.eligible) return heuristic;
+    return {
+      eligible: false,
+      reason: 'provider_unavailable',
+      provider: 'fallback',
+      confidence: heuristic.confidence,
+      message: '当前无法确认该关键词是否适合加入图谱。请换一个 AI 相关关键词，或配置 DeepSeek 后稍后重试 AI 判断。',
+    };
+  }
+
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Classify whether a search query belongs in an AI ecosystem knowledge graph. Return compact JSON only.',
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({
+              query: trimmed,
+              allowed_scope: [
+                'AI companies and labs',
+                'AI models',
+                'AI products',
+                'AI techniques and infrastructure',
+                'AI papers and research',
+                'AI people and investors',
+                'AI open source projects',
+              ],
+              out_of_scope_examples: ['cat', '猫', 'weather', 'food', 'travel', 'generic animals', 'generic daily objects'],
+              output_contract: {
+                eligible: 'boolean',
+                reason: 'ai_related or out_of_scope',
+                confidence: 'number 0-1',
+                message: 'short Chinese message for the user',
+              },
+            }),
+          },
+        ],
+        temperature: 0,
+        max_tokens: 180,
+        response_format: { type: 'json_object' },
+      }),
+    });
+
+    if (!response.ok) {
+      if (!heuristic.eligible) return heuristic;
+      return {
+        eligible: false,
+        reason: 'provider_unavailable',
+        provider: 'fallback',
+        confidence: heuristic.confidence,
+        message: `当前无法确认该关键词是否适合加入图谱。AI provider returned HTTP ${response.status}.`,
+      };
+    }
+
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const parsed = parseProviderJson(data.choices?.[0]?.message?.content ?? '');
+    const eligible = parsed.eligible === true;
+    const reason = eligible ? 'ai_related' : 'out_of_scope';
+
+    return {
+      eligible,
+      reason,
+      provider: 'deepseek',
+      confidence: clampConfidence(parsed.confidence, eligible ? 0.8 : 0.72),
+      message: normalizeText(
+        parsed.message,
+        eligible
+          ? '这个关键词属于 AI 生态，可以生成待审核图谱草稿。'
+          : '这个关键词不在当前知识图谱范围内。OpenConstellation 当前聚焦 AI 生态。',
+      ),
+    };
+  } catch (error) {
+    if (!heuristic.eligible) return heuristic;
+    return {
+      eligible: false,
+      reason: 'provider_unavailable',
+      provider: 'fallback',
+      confidence: heuristic.confidence,
+      message: error instanceof Error
+        ? `当前无法确认该关键词是否适合加入图谱：${error.message}`
+        : '当前无法确认该关键词是否适合加入图谱。请换一个 AI 相关关键词或稍后重试。',
+    };
+  }
+}
+
 function parseProviderJson(content: string): Record<string, unknown> {
   try {
     return JSON.parse(content) as Record<string, unknown>;
@@ -568,6 +690,41 @@ function normalizeEvents(value: unknown) {
     title: normalizeText(event.title, '') || undefined,
     description: normalizeText(event.description, ''),
   })).filter((event) => event.date && event.description).slice(0, 5);
+}
+
+function classifySearchQueryScopeHeuristic(query: string): SearchScopeResult {
+  const normalized = query.trim().toLowerCase();
+  const aiPattern = /\b(ai|agi|llm|ml|machine learning|deep learning|neural|model|agent|rag|embedding|transformer|diffusion|openai|anthropic|claude|gpt|gemini|llama|mistral|deepseek|hugging\s*face|pytorch|tensorflow|nvidia|cursor|copilot|sora|perplexity)\b/i;
+  const chineseAiPattern = /(人工智能|大模型|机器学习|深度学习|神经网络|模型|智能体|向量|检索增强|生成式|开源模型|机器人|算法)/;
+  const outOfScopePattern = /^(cat|cats|dog|dogs|weather|food|travel|movie|music|猫|狗|天气|美食|旅游|电影|音乐)$/i;
+
+  if (outOfScopePattern.test(normalized)) {
+    return {
+      eligible: false,
+      reason: 'out_of_scope',
+      provider: 'heuristic',
+      confidence: 0.9,
+      message: '这个关键词不在当前知识图谱范围内。OpenConstellation 当前聚焦 AI 生态。',
+    };
+  }
+
+  if (aiPattern.test(normalized) || chineseAiPattern.test(query)) {
+    return {
+      eligible: true,
+      reason: 'ai_related',
+      provider: 'heuristic',
+      confidence: 0.72,
+      message: '这个关键词看起来属于 AI 生态，可以生成待审核图谱草稿。',
+    };
+  }
+
+  return {
+    eligible: false,
+    reason: 'out_of_scope',
+    provider: 'heuristic',
+    confidence: 0.62,
+    message: '这个关键词不在当前知识图谱范围内。OpenConstellation 当前聚焦 AI 生态。',
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

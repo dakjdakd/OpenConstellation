@@ -3,7 +3,15 @@ import { useAppStore } from '../store';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Zap, Box, Compass, Sparkles, ArrowRight } from 'lucide-react';
 import AIGenerationBlock from './AIGenerationBlock';
-import { createAiSearchDraft, fetchSearchResults, type AiResult, type ImportBatch } from '../api';
+import {
+  ApiRequestError,
+  createAiSearchDraft,
+  fetchSearchScope,
+  fetchSearchResults,
+  type AiResult,
+  type ImportBatch,
+  type SearchDraftScopeError,
+} from '../api';
 import type { GraphNode } from '../types';
 
 export default function SearchExplorer() {
@@ -18,6 +26,8 @@ export default function SearchExplorer() {
   const [draftBatch, setDraftBatch] = useState<ImportBatch | null>(null);
   const [isCreatingDraft, setIsCreatingDraft] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [scopeNotice, setScopeNotice] = useState<SearchDraftScopeError | null>(null);
+  const [autoDraftQuery, setAutoDraftQuery] = useState<string | null>(null);
 
   const results = apiResults ?? [];
 
@@ -28,6 +38,8 @@ export default function SearchExplorer() {
     setSearchError(null);
     setDraftBatch(null);
     setDraftError(null);
+    setScopeNotice(null);
+    setAutoDraftQuery(null);
 
     if (!rawQuery.trim()) {
       setIsSearching(false);
@@ -40,6 +52,18 @@ export default function SearchExplorer() {
       setApiResults(response.items);
       setAiInterpretation(response.aiInterpretation ?? null);
       addSearchHistory(response.query);
+      if (response.items.length === 0) {
+        void fetchSearchScope(rawQuery).then((scope) => {
+          if (cancelled) return;
+          if (scope.eligible === false) {
+            setScopeNotice(scope);
+            return;
+          }
+          if (scope.reason === 'ai_related') {
+            void createDraft(rawQuery, true);
+          }
+        }).catch(() => undefined);
+      }
     }).catch((error) => {
       if (!cancelled) setSearchError(error instanceof Error ? error.message : 'Backend search request failed.');
     }).finally(() => {
@@ -51,19 +75,36 @@ export default function SearchExplorer() {
     };
   }, [rawQuery, addSearchHistory]);
 
-  const handleCreateDraft = async () => {
-    if (!rawQuery.trim() || isCreatingDraft) return;
+  const createDraft = async (queryText: string, automatic = false) => {
+    if (!queryText.trim()) return;
+    if (automatic && autoDraftQuery === queryText.trim()) return;
+    if (automatic) setAutoDraftQuery(queryText.trim());
+
     setIsCreatingDraft(true);
     setDraftError(null);
     try {
-      const response = await createAiSearchDraft(rawQuery);
+      const response = await createAiSearchDraft(queryText);
       setDraftBatch(response.batch);
     } catch (error) {
-      setDraftError(error instanceof Error ? error.message : 'AI draft request failed.');
+      if (error instanceof ApiRequestError && isSearchDraftScopeError(error.data)) {
+        setScopeNotice(error.data);
+        setDraftError(null);
+      } else {
+        setDraftError(error instanceof Error ? error.message : 'AI draft request failed.');
+      }
     } finally {
       setIsCreatingDraft(false);
     }
   };
+
+  const handleCreateDraft = async () => {
+    if (!rawQuery.trim() || isCreatingDraft) return;
+    await createDraft(rawQuery);
+  };
+
+  const exampleQueries = scopeNotice?.suggestions?.length ? scopeNotice.suggestions : ['OpenAI', 'Transformer', 'Claude', 'RAG'];
+  const showOutOfScope = results.length === 0 && !isSearching && scopeNotice?.reason === 'out_of_scope';
+  const showProviderUnavailable = results.length === 0 && !isSearching && scopeNotice?.reason === 'provider_unavailable';
 
   return (
     <div className="w-full h-full pt-14 flex overflow-hidden grid-bg">
@@ -103,12 +144,47 @@ export default function SearchExplorer() {
                 <p className="font-sans text-gray-500 mb-3">Search now depends on the real backend graph index. Start `npm.cmd run dev:api` and retry.</p>
                 <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 break-all">{searchError}</p>
              </div>
+          ) : showOutOfScope ? (
+             <div className="border border-gray-200 p-8 md:p-12 text-center bg-white">
+                <Box className="size-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl mb-2 text-balance">这个关键词不在当前知识图谱范围内</h3>
+                <p className="font-sans text-gray-500 text-pretty max-w-xl mx-auto">
+                  OpenConstellation 当前聚焦 AI 生态。请尝试搜索 AI 公司、模型、产品、技术、论文、人物或开源项目，例如 OpenAI、Transformer、Claude、RAG。
+                </p>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                  {exampleQueries.map((item) => (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setSearchParams({ q: item })}
+                      className="min-h-9 border border-gray-200 bg-white px-3 py-1.5 font-mono text-[10px] uppercase text-black hover:border-black"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+             </div>
+          ) : showProviderUnavailable ? (
+             <div className="border border-amber-200 p-8 md:p-12 text-center bg-white">
+                <Box className="size-12 text-amber-300 mx-auto mb-4" />
+                <h3 className="font-serif text-2xl mb-2 text-balance">当前无法确认该关键词是否适合加入图谱</h3>
+                <p className="font-sans text-gray-500 text-pretty max-w-xl mx-auto">
+                  请换一个 AI 相关关键词，或稍后重试 AI 判断。系统不会把未经确认的关键词写入主图谱。
+                </p>
+                <p className="mt-4 font-mono text-[10px] uppercase text-gray-400 break-all">{scopeNotice?.message}</p>
+             </div>
           ) : results.length === 0 && !isSearching ? (
              <div className="border border-gray-200 p-8 md:p-12 text-center bg-white">
                 <Box className="size-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="font-serif text-2xl mb-2 text-balance">Null Sector</h3>
+                <h3 className="font-serif text-2xl mb-2 text-balance">
+                  {isCreatingDraft ? 'Generating AI Draft' : draftBatch ? 'AI Draft Ready for Review' : 'No Curated Match Yet'}
+                </h3>
                 <p className="font-sans text-gray-500 text-pretty max-w-xl mx-auto">
-                  No curated entities match this query yet. Generate a structured AI draft and send it to the review queue before it becomes graph data.
+                  {draftBatch
+                    ? 'This AI-related keyword is not in the curated graph yet. A structured draft has been sent to the review queue before it becomes graph data.'
+                    : isCreatingDraft
+                      ? 'This AI-related keyword is not in the curated graph yet. The system is calling AI to prepare a structured draft for review.'
+                      : 'No curated entities match this query yet. Generate a structured AI draft only if this belongs in the AI ecosystem, then send it to the review queue before it becomes graph data.'}
                 </p>
                 <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <button
@@ -225,4 +301,10 @@ export default function SearchExplorer() {
 
     </div>
   );
+}
+
+function isSearchDraftScopeError(value: unknown): value is SearchDraftScopeError {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<SearchDraftScopeError>;
+  return candidate.eligible === false && (candidate.reason === 'out_of_scope' || candidate.reason === 'provider_unavailable');
 }

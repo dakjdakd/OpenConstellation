@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '../store';
-import { Search, History, TrendingUp, X } from 'lucide-react';
+import { Search, History, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SearchDropdown({ isFocused }: { isFocused: boolean }) {
@@ -14,19 +14,6 @@ export default function SearchDropdown({ isFocused }: { isFocused: boolean }) {
   }, [isFocused]);
 
   const queryStr = searchQuery || '';
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-       if (e.key === 'Enter' && queryStr.trim()) {
-         addSearchHistory(queryStr.trim());
-         navigate(`/search?q=${encodeURIComponent(queryStr.trim())}`);
-         setSearchQuery('');
-         setIsOpen(false);
-       }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [queryStr, navigate, setSearchQuery, addSearchHistory]);
 
   const handleFullSearch = () => {
     if (queryStr.trim()) {

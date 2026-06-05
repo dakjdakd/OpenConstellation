@@ -14,7 +14,7 @@ import {
   searchNodes,
   type SearchSort,
 } from '../graphService.ts';
-import { generateAiResult, generateStructuredNodeDraft, shouldUseCachedAiResult } from '../services/deepseek.ts';
+import { classifySearchQueryScope, generateAiResult, generateStructuredNodeDraft, shouldUseCachedAiResult } from '../services/deepseek.ts';
 
 export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, sourceStore: SourceStore, overrideStore: OverrideStore) {
   const router = Router();
@@ -124,6 +124,51 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
       return;
     }
 
+    const scope = await classifySearchQueryScope(query);
+    if (!scope.eligible) {
+      res.status(422).json({
+        error: scope.reason,
+        eligible: false,
+        reason: scope.reason,
+        provider: scope.provider,
+        confidence: scope.confidence,
+        message: scope.message,
+        suggestions: ['OpenAI', 'Transformer', 'Claude', 'RAG'],
+      });
+      return;
+    }
+
+    const existingPendingBatch = sourceStore
+      .getImportBatches('pending')
+      .find((batch) => batch.query?.trim().toLowerCase() === query.toLowerCase());
+    if (existingPendingBatch) {
+      res.status(200).json({
+        batch: existingPendingBatch,
+        draft: {
+          eligible: true,
+          reason: scope.reason,
+          provider: 'fallback',
+          model: 'existing-pending-batch',
+          confidence: existingPendingBatch.nodes[0]?.aiConfidence ?? scope.confidence,
+          source: 'review_queue',
+          editable: true,
+          metadata: {
+            source_tags: ['existing-pending-review'],
+            existing_batch: true,
+          },
+        },
+        metadata: {
+          status: 'pending_review',
+          eligible: true,
+          reason: scope.reason,
+          scopeProvider: scope.provider,
+          existingBatch: true,
+          message: 'A pending AI draft already exists for this query. Review it before creating another one.',
+        },
+      });
+      return;
+    }
+
     const draft = await generateStructuredNodeDraft({
       query,
       existingNodes: graph.nodes.map((node) => ({
@@ -203,6 +248,8 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
     res.status(202).json({
       batch,
       draft: {
+        eligible: true,
+        reason: scope.reason,
         provider: draft.provider,
         model: draft.model,
         confidence: draft.confidence,
@@ -212,8 +259,39 @@ export function createGraphRouter(graphStore: GraphStore, userStore: UserStore, 
       },
       metadata: {
         status: 'pending_review',
+        eligible: true,
+        reason: scope.reason,
+        scopeProvider: scope.provider,
         message: 'AI generated a structured graph draft. Review it in the data review panel before applying.',
       },
+    });
+  });
+
+  router.get('/search/scope', async (req, res) => {
+    const query = asString(req.query.q).trim();
+    if (!query) {
+      res.status(400).json({ error: 'search_query_required' });
+      return;
+    }
+
+    const graph = graphStore.getGraph();
+    const existingResults = searchNodes(graph, query);
+    if (existingResults.length) {
+      res.json({
+        eligible: true,
+        reason: 'existing_match',
+        provider: 'graph',
+        confidence: 1,
+        message: 'The graph already has matching entities.',
+        suggestions: [],
+      });
+      return;
+    }
+
+    const scope = await classifySearchQueryScope(query);
+    res.json({
+      ...scope,
+      suggestions: ['OpenAI', 'Transformer', 'Claude', 'RAG'],
     });
   });
 

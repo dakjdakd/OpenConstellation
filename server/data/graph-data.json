@@ -1584,6 +1584,66 @@
       ],
       "aiConfidence": 0.9,
       "aiSummary": "arXiv is a verified OpenConstellation entity sourced from public documentation and connected to adjacent AI ecosystem nodes through curated relationships."
+    },
+    {
+      "id": "memory",
+      "name": "Memory",
+      "type": "Technology",
+      "subtitle": "AI system memory and context retention technology",
+      "description": "Memory in AI refers to mechanisms that allow models to retain and recall information across interactions, including short-term context windows and long-term persistent storage. It enables personalization, agentic workflows, and multi-turn conversations by preserving user preferences, history, and state.",
+      "tags": [
+        "Memory",
+        "Context",
+        "Agents",
+        "Personalization"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "founders": [],
+      "relatedTechnology": [
+        "RAG",
+        "Vector Database",
+        "Context Window"
+      ],
+      "sourceList": [],
+      "aiSummary": "Memory is a foundational technology in AI that enables models to maintain and use information across interactions, crucial for personalization and agent behavior.",
+      "aiConfidence": 0.9,
+      "events": []
+    },
+    {
+      "id": "ai-draft-1780635577141",
+      "name": "豆包",
+      "type": "Product",
+      "subtitle": "AI chatbot by ByteDance",
+      "description": "豆包 (Doubao) is an AI-powered conversational assistant developed by ByteDance. It leverages large language models to provide chat, writing, and productivity assistance to users. Released in 2023, it is one of China's prominent AI chatbot products.",
+      "tags": [
+        "Chatbot",
+        "LLM",
+        "Productivity",
+        "ByteDance"
+      ],
+      "popularity": 8,
+      "status": "Active",
+      "website": "https://www.doubao.com/",
+      "foundedAt": "2023",
+      "founders": [],
+      "country": "China",
+      "relatedTechnology": [
+        "Transformer",
+        "Large Language Model"
+      ],
+      "sourceList": [
+        "https://www.doubao.com/"
+      ],
+      "aiSummary": "豆包 is a major AI chatbot product from ByteDance, representing China's competitive entry in the conversational AI space.",
+      "aiConfidence": 0.9,
+      "events": [
+        {
+          "date": "2023-08",
+          "title": "Launch",
+          "description": "ByteDance launched 豆包, its AI chatbot product."
+        }
+      ]
     }
   ],
   "edges": [
@@ -2330,6 +2390,66 @@
         "https://mistral.ai/company/",
         "https://ai.meta.com/"
       ]
+    },
+    {
+      "id": "e-memory-chatgpt-uses",
+      "sourceId": "memory",
+      "targetId": "chatgpt",
+      "relationType": "uses",
+      "weight": 0.7,
+      "description": "ChatGPT employs memory to retain user preferences and conversation history across sessions.",
+      "sourceList": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "e-memory-langchain-related-to",
+      "sourceId": "memory",
+      "targetId": "langchain",
+      "relationType": "related_to",
+      "weight": 0.7,
+      "description": "LangChain provides memory abstractions for conversation history and state management.",
+      "sourceList": [],
+      "confidence": 0.9
+    },
+    {
+      "id": "e-memory-claude-uses",
+      "sourceId": "memory",
+      "targetId": "claude",
+      "relationType": "uses",
+      "weight": 0.7,
+      "description": "Claude utilizes memory for maintaining context within a conversation window.",
+      "sourceList": [],
+      "confidence": 0.7
+    },
+    {
+      "id": "e-memory-vector-database-related-to",
+      "sourceId": "memory",
+      "targetId": "vector-database",
+      "relationType": "related_to",
+      "weight": 0.7,
+      "description": "Vector databases enable long-term memory storage by indexing embeddings for retrieval.",
+      "sourceList": [],
+      "confidence": 0.8
+    },
+    {
+      "id": "e-ai-draft-1780635577141-chatgpt-competes-with",
+      "sourceId": "ai-draft-1780635577141",
+      "targetId": "chatgpt",
+      "relationType": "competes_with",
+      "weight": 0.7,
+      "description": "豆包 competes directly with ChatGPT in the Chinese and global AI chatbot market.",
+      "sourceList": [],
+      "confidence": 0.8
+    },
+    {
+      "id": "e-ai-draft-1780635577141-transformer-powered-by",
+      "sourceId": "ai-draft-1780635577141",
+      "targetId": "transformer",
+      "relationType": "powered_by",
+      "weight": 0.7,
+      "description": "豆包 uses Transformer-based large language models for its conversational abilities.",
+      "sourceList": [],
+      "confidence": 0.9
     }
   ]
 }

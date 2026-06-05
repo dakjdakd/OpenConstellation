@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, BookOpen, Clock, Database, Info, Hexagon, Network } from 'lucide-react';
+import { Compass, BookOpen, Clock, Database, Info, Network } from 'lucide-react';
 import { useAppStore } from '../store';
 import { Link, useLocation } from 'react-router-dom';
 import SearchDropdown from './SearchDropdown';
@@ -28,7 +28,7 @@ export default function TopNav() {
   return (
     <nav className="fixed top-0 left-0 right-0 h-14 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50 flex items-center justify-between px-3 md:px-6">
       <Link to="/" className="flex items-center gap-2 md:gap-3">
-        <Hexagon className="w-5 h-5 text-black shrink-0" strokeWidth={1.5} />
+        <img src="/assets/logo.png" alt="OpenConstellation logo" className="w-7 h-7 rounded-md object-contain shrink-0" />
         <h1 className="font-serif text-sm md:text-lg font-medium tracking-tight whitespace-nowrap hidden sm:block">OpenConstellation</h1>
       </Link>
 

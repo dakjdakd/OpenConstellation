@@ -282,8 +282,52 @@ export default function UniverseMap() {
       }
     });
 
-    // Zoom out slightly at start to see the constellation
-    svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(0.8).translate(-width/2, -height/2));
+    const focusSelectedNode = (duration = 0) => {
+      if (!selectedNodeId) return false;
+      const target = simNodes.find((item) => item.id === selectedNodeId);
+      if (!target) return false;
+
+      const transform = d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(1.5)
+        .translate(-(target.x || width / 2), -(target.y || height / 2));
+
+      if (duration > 0) {
+        svg.transition().duration(duration).ease(d3.easeCubicOut).call(zoom.transform, transform);
+      } else {
+        svg.call(zoom.transform, transform);
+      }
+      return true;
+    };
+
+    const fitGraphToViewport = () => {
+      if (!simNodes.length) return;
+
+      const minX = d3.min(simNodes, (item) => item.x || 0) ?? 0;
+      const maxX = d3.max(simNodes, (item) => item.x || 0) ?? width;
+      const minY = d3.min(simNodes, (item) => item.y || 0) ?? 0;
+      const maxY = d3.max(simNodes, (item) => item.y || 0) ?? height;
+      const graphWidth = Math.max(maxX - minX, 1);
+      const graphHeight = Math.max(maxY - minY, 1);
+      const padding = 180;
+      const scale = Math.max(0.35, Math.min(1.1, Math.min((width - padding) / graphWidth, (height - padding) / graphHeight)));
+      const centerX = (minX + maxX) / 2;
+      const centerY = (minY + maxY) / 2;
+      const transform = d3.zoomIdentity
+        .translate(width / 2, height / 2)
+        .scale(scale)
+        .translate(-centerX, -centerY);
+
+      svg.call(zoom.transform, transform);
+    };
+
+    // Fit the current graph first, then center a requested search target.
+    simulation.tick(80);
+    if (selectedNodeId) {
+      focusSelectedNode(0);
+    } else {
+      fitGraphToViewport();
+    }
 
     function dragstarted(event: any) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -326,7 +370,7 @@ export default function UniverseMap() {
     return () => {
       simulation.stop();
     };
-  }, [nodes, edges]); // Rebuild layout only when filtered graph changes
+  }, [nodes, edges, selectedNodeId]); // Rebuild layout only when filtered graph or focus target changes
 
   // Update visual states based on selection/hover without restarting simulation
   useEffect(() => {

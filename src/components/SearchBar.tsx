@@ -2,9 +2,11 @@ import React from 'react';
 import { useAppStore } from '../store';
 import SearchDropdown from './SearchDropdown';
 import { AISearchIcon } from './icons';
+import { useNavigate } from 'react-router-dom';
 
 export default function SearchBar() {
   const { searchQuery, setSearchQuery, nodes, setIsolatedNodeId, setSelectedNodeId } = useAppStore();
+  const navigate = useNavigate();
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
@@ -34,12 +36,16 @@ export default function SearchBar() {
 
       const match = nodes.find(n => {
         const title = n.name.toLowerCase().replace(/\s+/g, '');
-        return title === q || title.includes(q) || q.includes(title);
+        return title === q;
       });
       
       if (match) {
         setIsolatedNodeId(match.id);
         setSelectedNodeId(match.id);
+        setSearchQuery('');
+        searchInputRef.current?.blur();
+      } else {
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
         setSearchQuery('');
         searchInputRef.current?.blur();
       }

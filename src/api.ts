@@ -124,6 +124,8 @@ export interface SourceListResponse {
 export interface AiSearchDraftResponse {
   batch: ImportBatch;
   draft: {
+    eligible: true;
+    reason: 'ai_related';
     provider: 'deepseek' | 'fallback';
     model: string;
     confidence: number;
@@ -133,8 +135,45 @@ export interface AiSearchDraftResponse {
   };
   metadata: {
     status: 'pending_review';
+    eligible: true;
+    reason: 'ai_related';
+    scopeProvider?: 'deepseek' | 'heuristic' | 'fallback';
     message: string;
   };
+}
+
+export interface SearchDraftScopeError {
+  error: 'out_of_scope' | 'provider_unavailable';
+  eligible: false;
+  reason: 'out_of_scope' | 'provider_unavailable';
+  provider: 'deepseek' | 'heuristic' | 'fallback';
+  confidence: number;
+  message: string;
+  suggestions: string[];
+}
+
+export type SearchScopeResponse =
+  | {
+      eligible: true;
+      reason: 'ai_related' | 'existing_match';
+      provider: 'deepseek' | 'heuristic' | 'fallback' | 'graph';
+      confidence: number;
+      message: string;
+      suggestions: string[];
+    }
+  | SearchDraftScopeError;
+
+export class ApiRequestError<T = unknown> extends Error {
+  status: number;
+  data: T | null;
+
+  constructor(status: number, data: T | null) {
+    const message = isErrorPayload(data) ? data.message || data.error : `Request failed: ${status}`;
+    super(message);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.data = data;
+  }
 }
 
 const DEFAULT_CONSTELLATION: UserConstellation = {
@@ -318,6 +357,10 @@ export async function createAiSearchDraft(query: string): Promise<AiSearchDraftR
   return postJson<AiSearchDraftResponse>('/api/search/draft', { query });
 }
 
+export async function fetchSearchScope(query: string): Promise<SearchScopeResponse> {
+  return requestJson<SearchScopeResponse>(`/api/search/scope?q=${encodeURIComponent(query.trim())}`);
+}
+
 export async function approveImportBatch(batchId: string) {
   return postJson<{ batch: ImportBatch; graph: GraphData; metadata: { totalNodes: number; totalEdges: number } }>(
     `/api/import-batches/${encodeURIComponent(batchId)}/approve`,
@@ -356,6 +399,18 @@ async function postJson<T>(url: string, body: unknown) {
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
-  if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+  if (!response.ok) {
+    let data: unknown = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+    throw new ApiRequestError(response.status, data);
+  }
   return (await response.json()) as T;
+}
+
+function isErrorPayload(value: unknown): value is { error?: string; message?: string } {
+  return typeof value === 'object' && value !== null;
 }
